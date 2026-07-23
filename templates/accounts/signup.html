@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up - Digital Library{% endblock %}
+{% block content %}
+<div class="glass form-container">
+    <h2 class="form-title">Create an Account</h2>
+    <p class="form-subtitle">Register to access and contribute to the library. Accounts require admin approval before login.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-error">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem;">{{ field.help_text }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            <i class="fa-solid fa-user-plus"></i> Sign Up
+        </button>
+    </form>
+    
+    <div class="form-footer">
+        Already have an account? <a href="{% url 'login' %}">Login here</a>
+    </div>
+</div>
+{% endblock %}

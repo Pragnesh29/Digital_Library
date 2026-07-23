@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - Digital Library{% endblock %}
+{% block content %}
+<div class="catalog-header">
+    <div class="catalog-title">
+        <h2>Faculty & Admin Dashboard</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.25rem;">Review registrations, content uploads, and manage highlighted documents for the homepage carousel.</p>
+    </div>
+</div>
+
+<div class="tabs-header">
+    <button class="tab-btn active" onclick="openTab(event, 'users-tab')">
+        <i class="fa-solid fa-users-gear"></i> Pending Users ({{ pending_users.count }})
+    </button>
+    <button class="tab-btn" onclick="openTab(event, 'books-tab')">
+        <i class="fa-solid fa-book-medical"></i> Pending Books ({{ pending_books.count }})
+    </button>
+    <button class="tab-btn" onclick="openTab(event, 'articles-tab')">
+        <i class="fa-solid fa-folder-plus"></i> Pending Articles ({{ pending_articles.count }})
+    </button>
+    <button class="tab-btn" onclick="openTab(event, 'highlights-tab')">
+        <i class="fa-solid fa-star"></i> Highlight Manager
+    </button>
+</div>
+
+<!-- Pending Users Tab -->
+<div id="users-tab" class="tab-content active">
+    {% if pending_users %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email / Contact</th>
+                        <th>Dept / Group</th>
+                        <th>Role Requested</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p_user in pending_users %}
+                        <tr>
+                            <td><strong>{{ p_user.username }}</strong></td>
+                            <td>{{ p_user.first_name }}</td>
+                            <td>
+                                {{ p_user.email }}<br>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ p_user.contact_no }}</span>
+                            </td>
+                            <td>
+                                {{ p_user.department.name|default:"-" }}<br>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">Group: {{ p_user.group.name|default:"-" }}</span>
+                            </td>
+                            <td>
+                                <span class="nav-user-badge" style="background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: #c084fc;">
+                                    {{ p_user.get_role_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <form method="POST" action="{% url 'approve_user' p_user.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-primary btn-sm" style="background: var(--success); box-shadow: none;">
+                                            <i class="fa-solid fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'approve_user' p_user.pk %}" onsubmit="return confirm('Are you sure you want to reject and delete this registration request?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                            <i class="fa-solid fa-xmark"></i> Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);"><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 0.5rem;"></i> No pending user registrations.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pending Books Tab -->
+<div id="books-tab" class="tab-content">
+    {% if pending_books %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Uploaded By</th>
+                        <th>Restrictions</th>
+                        <th>File Info</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in pending_books %}
+                        <tr>
+                            <td><strong>{{ book.title }}</strong></td>
+                            <td>{{ book.category_tag }}</td>
+                            <td>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
+                            <td>
+                                {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
+                                    <span style="font-size: 0.85rem; color: var(--danger); font-weight: 500;">Restricted</span>
+                                {% else %}
+                                    <span style="font-size: 0.85rem; color: var(--success);">Public</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ book.pdf.url }}" target="_blank" style="color: var(--accent-indigo); font-weight: 600;">
+                                    <i class="fa-solid fa-file-pdf"></i> View PDF
+                                </a>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <form method="POST" action="{% url 'approve_book' book.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-primary btn-sm" style="background: var(--success); box-shadow: none;">
+                                            <i class="fa-solid fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'approve_book' book.pk %}" onsubmit="return confirm('Are you sure you want to reject and delete this book upload?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                            <i class="fa-solid fa-xmark"></i> Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);"><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 0.5rem;"></i> No pending books to approve.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pending Articles Tab -->
+<div id="articles-tab" class="tab-content">
+    {% if pending_articles %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Uploaded By</th>
+                        <th>Photos</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in pending_articles %}
+                        <tr>
+                            <td><strong>{{ article.title }}</strong></td>
+                            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ article.description }}</td>
+                            <td>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
+                            <td>
+                                {% if article.images.exists %}
+                                    <a href="{% url 'article_detail' article.pk %}" target="_blank" style="color: var(--accent-indigo); font-weight:600;">
+                                        <i class="fa-solid fa-images"></i> View {{ article.images.count }} Photos
+                                    </a>
+                                {% else %}
+                                    No photos
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <form method="POST" action="{% url 'approve_article' article.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-primary btn-sm" style="background: var(--success); box-shadow: none;">
+                                            <i class="fa-solid fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'approve_article' article.pk %}" onsubmit="return confirm('Are you sure you want to reject and delete this article?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                            <i class="fa-solid fa-xmark"></i> Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);"><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 0.5rem;"></i> No pending articles to approve.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Highlight Manager Tab -->
+<div id="highlights-tab" class="tab-content">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        
+        <!-- Books Highlight List -->
+        <div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-book"></i> Approved Books</h3>
+            {% if approved_books %}
+                <div class="glass table-container" style="padding: 1rem;">
+                    <table class="dashboard-table" style="font-size: 0.85rem;">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Highlight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in approved_books %}
+                                <tr>
+                                    <td>{{ book.title }}</td>
+                                    <td>
+                                        <form method="POST" action="{% url 'toggle_highlight' 'book' book.pk %}">
+                                            {% csrf_token %}
+                                            {% if book.is_highlighted %}
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                    <i class="fa-solid fa-star"></i> Featured
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                    <i class="fa-regular fa-star"></i> Highlight
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No approved books to display.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Articles Highlight List -->
+        <div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-regular fa-newspaper"></i> Approved Articles</h3>
+            {% if approved_articles %}
+                <div class="glass table-container" style="padding: 1rem;">
+                    <table class="dashboard-table" style="font-size: 0.85rem;">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Highlight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for article in approved_articles %}
+                                <tr>
+                                    <td>{{ article.title }}</td>
+                                    <td>
+                                        <form method="POST" action="{% url 'toggle_highlight' 'article' article.pk %}">
+                                            {% csrf_token %}
+                                            {% if article.is_highlighted %}
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                    <i class="fa-solid fa-star"></i> Featured
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                    <i class="fa-regular fa-star"></i> Highlight
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No approved articles to display.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openTab(evt, tabId) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+{% endblock %}

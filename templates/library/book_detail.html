@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ book.title }} - Digital Library{% endblock %}
+{% block content %}
+<div>
+    <a href="{% url 'book_list' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); margin-bottom: 2rem; font-weight: 500;">
+        <i class="fa-solid fa-arrow-left-long"></i> Back to Books Catalog
+    </a>
+</div>
+
+<div class="detail-layout">
+    <!-- Sidebar -->
+    <div class="detail-sidebar">
+        {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="detail-cover">
+        {% else %}
+            <!-- Fallback design -->
+            <div class="detail-cover" style="background: linear-gradient(135deg, #1e1b4b, #311042); height: 480px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; border-radius: 12px; border: 1px solid var(--border-glass);">
+                <i class="fa-solid fa-book-open" style="font-size: 5rem; color: var(--accent-indigo); margin-bottom: 1.5rem;"></i>
+                <span style="font-size: 1.5rem; font-weight: 800; color: white;">{{ book.title }}</span>
+            </div>
+        {% endif %}
+        
+        <div style="margin-top: 1.5rem;">
+            <a href="{{ book.pdf.url }}" target="_blank" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-file-pdf"></i> Open / Download PDF
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="detail-content">
+        <span style="display: inline-block; padding: 0.35rem 0.75rem; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; border-radius: 4px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 1rem;">
+            {{ book.category_tag }}
+        </span>
+        
+        <h1>{{ book.title }}</h1>
+        
+        <div class="detail-meta-row">
+            <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</strong></span>
+            <span><i class="fa-solid fa-calendar-days" style="color: var(--accent-violet); margin-right: 0.25rem;"></i> Added on: <strong>{{ book.created_at|date:"M d, Y" }}</strong></span>
+        </div>
+        
+        <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-shield-halved" style="color: var(--accent-indigo);"></i> Visibility Permissions</h3>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+                {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
+                    This document contains sensitive information and is restricted to:
+                    <br>
+                    {% if book.restricted_to_departments.exists %}
+                        <strong>Departments:</strong> 
+                        {% for dept in book.restricted_to_departments.all %}
+                            <span class="nav-user-badge" style="display: inline-block; margin: 0.2rem 0; font-size: 0.75rem;">{{ dept.name }}</span>
+                        {% endfor %}
+                        <br>
+                    {% endif %}
+                    {% if book.restricted_to_groups.exists %}
+                        <strong>Groups:</strong> 
+                        {% for grp in book.restricted_to_groups.all %}
+                            <span class="nav-user-badge" style="display: inline-block; margin: 0.2rem 0; font-size: 0.75rem; background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: #c084fc;">{{ grp.name }}</span>
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                    <i class="fa-solid fa-globe" style="color: var(--success);"></i> Publicly visible to all authorized library members.
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Interactive PDF Reader Embed -->
+        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-eye" style="color: var(--accent-violet);"></i> PDF Reader Preview</h3>
+        <div class="glass" style="padding: 0.5rem; border-radius: 12px; overflow: hidden; height: 600px; background: rgba(0,0,0,0.2);">
+            <embed src="{{ book.pdf.url }}" type="application/pdf" width="100%" height="100%" />
+        </div>
+    </div>
+</div>
+{% endblock %}

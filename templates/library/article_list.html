@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Articles - Digital Library{% endblock %}
+{% block content %}
+<div class="catalog-header">
+    <div class="catalog-title">
+        <h2>Approved Articles</h2>
+    </div>
+    <div>
+        <a href="{% url 'article_upload' %}" class="btn btn-primary">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Article
+        </a>
+    </div>
+</div>
+
+{% if articles %}
+    <div class="catalog-grid">
+        {% for article in articles %}
+            <div class="glass article-card">
+                <h3 class="article-title">{{ article.title }}</h3>
+                <p class="article-desc">{{ article.description }}</p>
+                
+                <div class="article-meta">
+                    <span>
+                        <i class="fa-solid fa-user"></i> {{ article.uploaded_by.first_name|default:article.uploaded_by.username }}
+                    </span>
+                    <span>
+                        <i class="fa-solid fa-images"></i> {{ article.images.count }} photos
+                    </span>
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <a href="{% url 'article_detail' article.pk %}" class="btn btn-secondary btn-sm" style="width: 100%;">
+                        Read Article <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="glass" style="padding: 4rem 2rem; text-align: center;">
+        <i class="fa-regular fa-newspaper" style="font-size: 4.5rem; color: var(--text-secondary); margin-bottom: 1.5rem; opacity: 0.6;"></i>
+        <h3>No Articles Available</h3>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 2rem;">There are no approved articles in the library catalog yet.</p>
+        <a href="{% url 'article_upload' %}" class="btn btn-primary">Upload the First Article</a>
+    </div>
+{% endif %}
+{% endblock %}

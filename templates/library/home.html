@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Digital Library{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1>Welcome to the Digital Library</h1>
+        <p>Your portal to academic excellence. Access research papers, books, and articles seamlessly. Collaborate, share, and expand your horizons within your department and division.</p>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'book_list' %}" class="btn btn-primary">
+                    <i class="fa-solid fa-book-open"></i> Browse Books
+                </a>
+                <a href="{% url 'article_list' %}" class="btn btn-secondary">
+                    <i class="fa-regular fa-newspaper"></i> Read Articles
+                </a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn btn-primary">Get Started</a>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Sign In</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Carousel Container -->
+    <div class="carousel-container glass">
+        {% if carousel_items %}
+            {% for item in carousel_items %}
+                <div class="carousel-slide {% if forloop.first %}active{% endif %}">
+                    {% if item.image %}
+                        <img src="{{ item.image }}" alt="{{ item.title }}" class="carousel-bg">
+                    {% else %}
+                        <!-- Visual Fallback BG for item without image -->
+                        <div class="carousel-bg" style="background: linear-gradient(135deg, #1e1b4b, #311042); width:100%; height:100%; position:absolute; top:0; left:0; z-index:-1; filter: brightness(0.6);"></div>
+                    {% endif %}
+                    <div class="carousel-content">
+                        <span class="carousel-tag">{{ item.tag }}</span>
+                        <h2 class="carousel-title">{{ item.title }}</h2>
+                        <p class="carousel-desc">{{ item.desc }}</p>
+                        <a href="{% url item.url_name item.pk %}" class="btn btn-primary btn-sm">
+                            View Details <i class="fa-solid fa-circle-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+            <!-- Controls -->
+            <button class="carousel-control carousel-prev" onclick="moveSlide(-1)">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="carousel-control carousel-next" onclick="moveSlide(1)">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        {% else %}
+            <!-- Fallback if no items highlighted -->
+            <div class="carousel-slide active" style="justify-content: center; align-items: center; text-align: center; padding: 2rem;">
+                <div class="carousel-bg" style="background: linear-gradient(135deg, #1e1b4b, #311042); width:100%; height:100%; position:absolute; top:0; left:0; z-index:-1; filter: brightness(0.6);"></div>
+                <div style="max-width: 80%;">
+                    <span class="carousel-tag">Featured</span>
+                    <h2 class="carousel-title">No Highlights Available</h2>
+                    <p class="carousel-desc">Faculty and Administrators will highlight books and articles here once they are uploaded and approved.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="glass" style="padding: 2.5rem; margin-top: 3rem;">
+    <h3 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">Library Highlights</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 2rem;">
+        <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-glass);">
+            <i class="fa-solid fa-shield-halved" style="font-size: 2rem; color: var(--accent-indigo); margin-bottom: 1rem;"></i>
+            <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Access Controlled</h4>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;">Sensitive books and research notes can be restricted to specific departments or research groups during upload.</p>
+        </div>
+        <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-glass);">
+            <i class="fa-solid fa-user-check" style="font-size: 2rem; color: var(--accent-violet); margin-bottom: 1rem;"></i>
+            <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Faculty Approval</h4>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;">Maintain academic integrity. All user registrations and content uploads require approval from our expert faculty panel.</p>
+        </div>
+        <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border-glass);">
+            <i class="fa-solid fa-share-nodes" style="font-size: 2rem; color: var(--success); margin-bottom: 1rem;"></i>
+            <h4 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Knowledge Sharing</h4>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5;">Easily share knowledge by uploading books (in PDF format with cover pages) and multi-photo articles with rich descriptions.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if carousel_items %}
+<script>
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    let slideTimer = setInterval(() => moveSlide(1), 5000);
+
+    function showSlide(index) {
+        slides.forEach(slide => slide.classList.remove('active'));
+        
+        slideIndex = index;
+        if (slideIndex >= slides.length) slideIndex = 0;
+        if (slideIndex < 0) slideIndex = slides.length - 1;
+        
+        slides[slideIndex].classList.add('active');
+    }
+
+    function moveSlide(n) {
+        clearInterval(slideTimer);
+        showSlide(slideIndex + n);
+        slideTimer = setInterval(() => moveSlide(1), 5000);
+    }
+</script>
+{% endif %}
+{% endblock %}

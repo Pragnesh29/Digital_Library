@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Login - Digital Library{% endblock %}
+{% block content %}
+<div class="glass form-container">
+    <h2 class="form-title">Welcome Back</h2>
+    <p class="form-subtitle">Login to access books, articles, and upload materials.</p>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation" style="margin-right: 0.5rem;"></i>
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                    <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">
+                        <i class="fa-solid fa-circle-exclamation"></i> {{ error }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            <i class="fa-solid fa-right-to-bracket"></i> Login
+        </button>
+    </form>
+    
+    <div class="form-footer">
+        Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>
+    </div>
+</div>
+{% endblock %}

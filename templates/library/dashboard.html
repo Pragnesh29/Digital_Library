@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}My Uploads Status - Digital Library{% endblock %}
+{% block content %}
+<div class="catalog-header">
+    <div class="catalog-title">
+        <h2>My Upload Status</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.25rem;">Track the status of your uploaded books and articles, and manage your approval requests.</p>
+    </div>
+</div>
+
+<div class="tabs-header">
+    <button class="tab-btn active" onclick="openTab(event, 'books-tab')">
+        <i class="fa-solid fa-book"></i> Uploaded Books ({{ books.count }})
+    </button>
+    <button class="tab-btn" onclick="openTab(event, 'articles-tab')">
+        <i class="fa-regular fa-newspaper"></i> Uploaded Articles ({{ articles.count }})
+    </button>
+</div>
+
+<!-- Books Tab Content -->
+<div id="books-tab" class="tab-content active">
+    {% if books %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in books %}
+                        <tr>
+                            <td>
+                                <strong>{{ book.title }}</strong>
+                                {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
+                                    <span style="font-size: 0.75rem; color: var(--danger); margin-left: 0.5rem;"><i class="fa-solid fa-lock"></i> Restricted</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99, 102, 241, 0.1);">{{ book.category_tag }}</span></td>
+                            <td>{{ book.created_at|date:"M d, Y, h:i A" }}</td>
+                            <td>
+                                {% if book.is_approved %}
+                                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                {% else %}
+                                    <span class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> Pending Approval</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    {% if book.is_approved %}
+                                        <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary btn-sm">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'cancel_upload' 'book' book.pk %}" onsubmit="return confirm('Are you sure you want to cancel and delete the upload request for \'{{ book.title|escapejs }}\'?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fa-solid fa-trash-can"></i> Cancel Request
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);">You haven't uploaded any books yet.</p>
+            <a href="{% url 'book_upload' %}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Upload a Book</a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Articles Tab Content -->
+<div id="articles-tab" class="tab-content">
+    {% if articles %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Photos</th>
+                        <th>Upload Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr>
+                            <td><strong>{{ article.title }}</strong></td>
+                            <td>{{ article.images.count }} photos</td>
+                            <td>{{ article.created_at|date:"M d, Y, h:i A" }}</td>
+                            <td>
+                                {% if article.is_approved %}
+                                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                {% else %}
+                                    <span class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> Pending Approval</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    {% if article.is_approved %}
+                                        <a href="{% url 'article_detail' article.pk %}" class="btn btn-secondary btn-sm">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'cancel_upload' 'article' article.pk %}" onsubmit="return confirm('Are you sure you want to cancel and delete the upload request for \'{{ article.title|escapejs }}\'?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fa-solid fa-trash-can"></i> Cancel Request
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);">You haven't uploaded any articles yet.</p>
+            <a href="{% url 'article_upload' %}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Upload an Article</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openTab(evt, tabId) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tab-content" and hide them
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+
+        // Get all elements with class="tab-btn" and remove the class "active"
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+{% endblock %}

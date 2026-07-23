@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Pending Approval - Digital Library{% endblock %}
+{% block content %}
+<div class="glass info-card">
+    <div class="info-icon">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+    </div>
+    <h2>Registration Successful</h2>
+    <p>Your account details have been submitted. An administrator or faculty approver will review your details shortly. Once approved, you will be able to log in to access the Digital Library.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="{% url 'login' %}" class="btn btn-primary">Go to Login</a>
+    </div>
+</div>
+{% endblock %}

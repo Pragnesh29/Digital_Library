@@ -1,0 +1,287 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Q
+from .models import Book, Article, ArticleImage
+from .forms import BookUploadForm, ArticleUploadForm
+from accounts.models import CustomUser, Department, Group
+
+def home_view(request):
+    # Fetch highlighted books and articles for the home page carousel
+    highlighted_books = Book.objects.filter(is_approved=True, is_highlighted=True).order_by('-created_at')
+    highlighted_articles = Article.objects.filter(is_approved=True, is_highlighted=True).order_by('-created_at')
+    
+    # Merge highlighted list for carousel
+    carousel_items = []
+    for b in highlighted_books:
+        carousel_items.append({
+            'type': 'book',
+            'title': b.title,
+            'tag': b.category_tag,
+            'image': b.cover_image.url if b.cover_image else None,
+            'url_name': 'book_detail',
+            'pk': b.pk,
+            'desc': f"Category: {b.category_tag} | Uploaded by {b.uploaded_by.first_name or b.uploaded_by.username}"
+        })
+    for a in highlighted_articles:
+        # Get first image of the article if it exists
+        first_img = a.images.first()
+        carousel_items.append({
+            'type': 'article',
+            'title': a.title,
+            'tag': 'Article',
+            'image': first_img.image.url if first_img else None,
+            'url_name': 'article_detail',
+            'pk': a.pk,
+            'desc': a.description[:150] + "..." if len(a.description) > 150 else a.description
+        })
+        
+    context = {
+        'carousel_items': carousel_items,
+    }
+    return render(request, 'library/home.html', context)
+
+@login_required
+def book_list_view(request):
+    user = request.user
+    
+    # Access Control logic
+    # Faculty and Super Admin see all approved books
+    if user.role in ['faculty', 'superuser'] or user.is_superuser:
+        books = Book.objects.filter(is_approved=True).order_by('-created_at')
+    else:
+        # Regular users see approved books which are either public OR match their department OR match their group
+        books = Book.objects.filter(is_approved=True).filter(
+            Q(restricted_to_departments__isnull=True, restricted_to_groups__isnull=True) |
+            Q(restricted_to_departments=user.department) |
+            Q(restricted_to_groups=user.group)
+        ).distinct().order_by('-created_at')
+        
+    context = {
+        'books': books,
+    }
+    return render(request, 'library/book_list.html', context)
+
+@login_required
+def book_detail_view(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    user = request.user
+    
+    # Enforce access control for details
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser or book.uploaded_by == user):
+        # Check if the book has restrictions
+        has_dept_restrictions = book.restricted_to_departments.exists()
+        has_group_restrictions = book.restricted_to_groups.exists()
+        
+        if has_dept_restrictions or has_group_restrictions:
+            is_dept_allowed = book.restricted_to_departments.filter(pk=user.department.pk).exists() if user.department else False
+            is_group_allowed = book.restricted_to_groups.filter(pk=user.group.pk).exists() if user.group else False
+            
+            if not (is_dept_allowed or is_group_allowed):
+                messages.error(request, "Access Denied: You do not belong to the permitted division/department or group to view this book.")
+                return redirect('book_list')
+                
+    context = {
+        'book': book,
+    }
+    return render(request, 'library/book_detail.html', context)
+
+@login_required
+def book_upload_view(request):
+    if request.method == 'POST':
+        form = BookUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            book = form.save(commit=False)
+            book.uploaded_by = request.user
+            book.is_approved = False  # Always goes to admin approval
+            book.save()
+            form.save_m2m() # Required to save ManyToMany restricted departments/groups
+            messages.success(request, f"Book '{book.title}' uploaded successfully! It is currently pending approval by Faculty/Admin.")
+            return redirect('user_dashboard')
+        else:
+            messages.error(request, "Failed to upload book. Please review form errors.")
+    else:
+        form = BookUploadForm()
+    return render(request, 'library/book_upload.html', {'form': form})
+
+@login_required
+def article_list_view(request):
+    articles = Article.objects.filter(is_approved=True).order_by('-created_at')
+    context = {
+        'articles': articles,
+    }
+    return render(request, 'library/article_list.html', context)
+
+@login_required
+def article_detail_view(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+    context = {
+        'article': article,
+    }
+    return render(request, 'library/article_detail.html', context)
+
+@login_required
+def article_upload_view(request):
+    if request.method == 'POST':
+        form = ArticleUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            article = form.save(commit=False)
+            article.uploaded_by = request.user
+            article.is_approved = False
+            article.save()
+            
+            # Handle multiple image uploads
+            images = request.FILES.getlist('images')
+            for img in images:
+                ArticleImage.objects.create(article=article, image=img)
+                
+            messages.success(request, f"Article '{article.title}' uploaded successfully! It is currently pending approval by Faculty/Admin.")
+            return redirect('user_dashboard')
+        else:
+            messages.error(request, "Failed to upload article. Please review form errors.")
+    else:
+        form = ArticleUploadForm()
+    return render(request, 'library/article_upload.html', {'form': form})
+
+@login_required
+def user_dashboard_view(request):
+    # Fetch user's uploads
+    books = Book.objects.filter(uploaded_by=request.user).order_by('-created_at')
+    articles = Article.objects.filter(uploaded_by=request.user).order_by('-created_at')
+    
+    context = {
+        'books': books,
+        'articles': articles,
+    }
+    return render(request, 'library/dashboard.html', context)
+
+@login_required
+def cancel_upload_view(request, content_type, pk):
+    # Enforce request type
+    if request.method == 'POST':
+        if content_type == 'book':
+            item = get_object_or_404(Book, pk=pk, uploaded_by=request.user)
+        elif content_type == 'article':
+            item = get_object_or_404(Article, pk=pk, uploaded_by=request.user)
+        else:
+            messages.error(request, "Invalid upload type.")
+            return redirect('user_dashboard')
+            
+        if not item.is_approved:
+            title = item.title
+            item.delete()
+            messages.success(request, f"Pending upload request for '{title}' has been cancelled.")
+        else:
+            messages.error(request, "Cannot cancel request; it has already been approved.")
+            
+    return redirect('user_dashboard')
+
+
+@login_required
+def admin_dashboard_view(request):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied: You do not have permissions to view the Admin Dashboard.")
+        return redirect('home')
+        
+    pending_users = CustomUser.objects.filter(is_approved=False).order_by('-date_joined')
+    pending_books = Book.objects.filter(is_approved=False).order_by('-created_at')
+    pending_articles = Article.objects.filter(is_approved=False).order_by('-created_at')
+    
+    approved_books = Book.objects.filter(is_approved=True).order_by('-created_at')
+    approved_articles = Article.objects.filter(is_approved=True).order_by('-created_at')
+    
+    context = {
+        'pending_users': pending_users,
+        'pending_books': pending_books,
+        'pending_articles': pending_articles,
+        'approved_books': approved_books,
+        'approved_articles': approved_articles,
+    }
+    return render(request, 'library/admin_dashboard.html', context)
+
+@login_required
+def approve_user_view(request, user_id):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    target_user = get_object_or_404(CustomUser, pk=user_id)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            target_user.is_approved = True
+            target_user.save()
+            messages.success(request, f"User '{target_user.username}' has been approved.")
+        elif action == 'reject':
+            username = target_user.username
+            target_user.delete()
+            messages.warning(request, f"Registration request for '{username}' was rejected.")
+            
+    return redirect('admin_dashboard')
+
+@login_required
+def approve_book_view(request, book_id):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    book = get_object_or_404(Book, pk=book_id)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            book.is_approved = True
+            book.save()
+            messages.success(request, f"Book '{book.title}' has been approved.")
+        elif action == 'reject':
+            title = book.title
+            book.delete()
+            messages.warning(request, f"Book '{title}' upload was rejected.")
+            
+    return redirect('admin_dashboard')
+
+@login_required
+def approve_article_view(request, article_id):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    article = get_object_or_404(Article, pk=article_id)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            article.is_approved = True
+            article.save()
+            messages.success(request, f"Article '{article.title}' has been approved.")
+        elif action == 'reject':
+            title = article.title
+            article.delete()
+            messages.warning(request, f"Article '{title}' upload was rejected.")
+            
+    return redirect('admin_dashboard')
+
+@login_required
+def toggle_highlight_view(request, content_type, pk):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        if content_type == 'book':
+            item = get_object_or_404(Book, pk=pk, is_approved=True)
+        elif content_type == 'article':
+            item = get_object_or_404(Article, pk=pk, is_approved=True)
+        else:
+            messages.error(request, "Invalid content type.")
+            return redirect('admin_dashboard')
+            
+        item.is_highlighted = not item.is_highlighted
+        item.save()
+        status = "highlighted on the home page" if item.is_highlighted else "removed from home page highlights"
+        messages.success(request, f"'{item.title}' has been {status}.")
+        
+    return redirect('admin_dashboard')

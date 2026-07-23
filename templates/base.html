@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Digital Library{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="nav-logo">
+            <i class="fa-solid fa-graduation-cap"></i> Digital Library
+        </a>
+        
+        <div class="nav-links">
+            <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'book_list' %}" class="{% if 'book' in request.resolver_match.url_name %}active{% endif %}">Books</a>
+                <a href="{% url 'article_list' %}" class="{% if 'article' in request.resolver_match.url_name %}active{% endif %}">Articles</a>
+                <a href="{% url 'user_dashboard' %}" class="{% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">Upload Status</a>
+                {% if user.role == 'faculty' or user.role == 'superuser' or user.is_superuser %}
+                    <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-gauge"></i> Admin Dashboard
+                    </a>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="nav-auth">
+            {% if user.is_authenticated %}
+                <span class="nav-user-badge">
+                    <i class="fa-solid fa-user"></i> {{ user.first_name|default:user.username }} 
+                    ({{ user.get_role_display }})
+                </span>
+                <a href="{% url 'logout' %}" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Login</a>
+                <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Django Flash Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {% if message.tags == 'success' %}
+                <i class="fa-solid fa-circle-check" style="margin-right: 0.5rem;"></i>
+            {% elif message.tags == 'error' %}
+                <i class="fa-solid fa-circle-exclamation" style="margin-right: 0.5rem;"></i>
+            {% else %}
+                <i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i>
+            {% endif %}
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; {% now "Y" %} Digital Library. Built with Django and modern design. All rights reserved.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
