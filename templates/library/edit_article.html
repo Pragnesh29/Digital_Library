@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Edit Article: {{ article.title }} - Digital Library{% endblock %}
+{% block content %}
+<div>
+    <a href="{% url 'admin_dashboard' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); margin-bottom: 2rem; font-weight: 500;">
+        <i class="fa-solid fa-arrow-left-long"></i> Back to Admin Dashboard
+    </a>
+</div>
+
+<div class="glass form-container" style="max-width: 750px;">
+    <h2 class="form-title">Edit Article</h2>
+    <p class="form-subtitle">Modify article title, description, and upload new/additional photos.</p>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-error">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% for error in form.title.errors %}
+                <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% for error in form.description.errors %}
+                <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        
+        <!-- Gallery Management (display existing photos) -->
+        {% if article.images.exists %}
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-images" style="color: var(--accent-indigo); margin-right: 0.5rem;"></i> Existing Photos</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem;">
+                    {% for img in article.images.all %}
+                        <div style="position: relative; border-radius: 6px; border: 1px solid var(--border-glass); overflow: hidden; height: 100px;">
+                            <img src="{{ img.image.url }}" alt="Slide" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label for="{{ form.images.id_for_label }}">{{ form.images.label }}</label>
+            {{ form.images }}
+            {% for error in form.images.errors %}
+                <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
+            {% endfor %}
+            <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem;">
+                Uploading photos here will append them to the existing article gallery.
+            </span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

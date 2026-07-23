@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib import messages
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.decorators import login_required
 from .forms import UserSignupForm
+from library.utils import log_action
 
 def signup_view(request):
     if request.user.is_authenticated:
@@ -15,6 +17,7 @@ def signup_view(request):
             user.is_approved = False  # Explicitly set to false (handled by model save but good to be explicit)
             user.save()
             messages.success(request, "Registration successful! Your account has been sent for admin approval.")
+            log_action(None, "User Registered", f"New user '{user.username}' created and pending approval")
             return redirect('pending_approval')
     else:
         form = UserSignupForm()
@@ -59,3 +62,25 @@ def logout_view(request):
 
 def pending_approval_view(request):
     return render(request, 'accounts/pending_approval.html')
+
+@login_required
+def change_password_view(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Keep the user logged in
+            messages.success(request, 'Your password was successfully updated!')
+            log_action(request.user, "Password Changed", "Changed own password")
+            return redirect('home')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = PasswordChangeForm(request.user)
+        
+    # Style form control
+    for field_name, field in form.fields.items():
+        field.widget.attrs['class'] = 'form-control'
+        field.widget.attrs['placeholder'] = f'Enter {field.label}'
+        
+    return render(request, 'accounts/change_password.html', {'form': form})

@@ -12,10 +12,44 @@
     </div>
 </div>
 
+<!-- Instant Client-Side Filter Form -->
+<form onsubmit="event.preventDefault();" class="glass" style="padding: 1.5rem; margin-bottom: 2rem; display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+    <div class="form-group" style="margin-bottom: 0;">
+        <label for="search-input" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Search by Book Title</label>
+        <input type="text" id="search-input" class="form-control" placeholder="Type title keywords to filter instantly...">
+    </div>
+    
+    <div class="form-group" style="margin-bottom: 0;">
+        <label for="category-filter" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Category Tag</label>
+        <select id="category-filter" class="form-control">
+            <option value="">-- All Categories --</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="form-group" style="margin-bottom: 0;">
+        <label for="dept-filter" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Department Restriction</label>
+        <select id="dept-filter" class="form-control">
+            <option value="">-- All Departments --</option>
+            {% for dept in departments %}
+                <option value="{{ dept.pk }}">{{ dept.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div>
+        <button type="button" class="btn btn-secondary" onclick="resetFilters();" title="Reset all filters" style="padding: 0.75rem 1.25rem; width: 100%;">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+    </div>
+</form>
+
 {% if books %}
-    <div class="catalog-grid">
+    <div class="catalog-grid" id="books-grid">
         {% for book in books %}
-            <div class="glass book-card">
+            <div class="glass book-card" data-category="{{ book.category_tag|escapejs }}" data-departments="{% for dept in book.restricted_to_departments.all %}{{ dept.pk }},{% endfor %}">
                 <div class="book-cover-container">
                     {% if book.cover_image %}
                         <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover">
@@ -48,6 +82,13 @@
                 </div>
             </div>
         {% endfor %}
+        
+        <!-- Client-Side No Results Message -->
+        <div id="no-results-msg" class="glass" style="display: none; padding: 4rem 2rem; text-align: center; width: 100%; grid-column: 1 / -1;">
+            <i class="fa-solid fa-magnifying-glass" style="font-size: 4.5rem; color: var(--text-secondary); margin-bottom: 1.5rem; opacity: 0.6;"></i>
+            <h3>No Matching Books Found</h3>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try adjusting your search keywords or choosing different filters.</p>
+        </div>
     </div>
 {% else %}
     <div class="glass" style="padding: 4rem 2rem; text-align: center;">
@@ -57,4 +98,55 @@
         <a href="{% url 'book_upload' %}" class="btn btn-primary">Upload the First Book</a>
     </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterBooks() {
+        const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+        const categoryVal = document.getElementById('category-filter').value;
+        const deptVal = document.getElementById('dept-filter').value;
+        
+        const cards = document.querySelectorAll('.book-card');
+        let visibleCount = 0;
+        
+        cards.forEach(card => {
+            const title = card.querySelector('.book-title').textContent.toLowerCase();
+            const category = card.getAttribute('data-category');
+            const depts = card.getAttribute('data-departments').split(',');
+            
+            let matchesSearch = !searchVal || title.includes(searchVal);
+            let matchesCategory = !categoryVal || category === categoryVal;
+            let matchesDept = !deptVal || depts.includes(deptVal);
+            
+            if (matchesSearch && matchesCategory && matchesDept) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        const noResults = document.getElementById('no-results-msg');
+        if (noResults) {
+            if (visibleCount === 0) {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        }
+    }
+
+    function resetFilters() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('category-filter').value = '';
+        document.getElementById('dept-filter').value = '';
+        filterBooks();
+    }
+
+    // Bind real-time input event listeners
+    document.getElementById('search-input').addEventListener('input', filterBooks);
+    document.getElementById('category-filter').addEventListener('change', filterBooks);
+    document.getElementById('dept-filter').addEventListener('change', filterBooks);
+</script>
 {% endblock %}

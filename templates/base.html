@@ -28,7 +28,6 @@
             {% if user.is_authenticated %}
                 <a href="{% url 'book_list' %}" class="{% if 'book' in request.resolver_match.url_name %}active{% endif %}">Books</a>
                 <a href="{% url 'article_list' %}" class="{% if 'article' in request.resolver_match.url_name %}active{% endif %}">Articles</a>
-                <a href="{% url 'user_dashboard' %}" class="{% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">Upload Status</a>
                 {% if user.role == 'faculty' or user.role == 'superuser' or user.is_superuser %}
                     <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
                         <i class="fa-solid fa-gauge"></i> Admin Dashboard
@@ -39,13 +38,30 @@
 
         <div class="nav-auth">
             {% if user.is_authenticated %}
-                <span class="nav-user-badge">
-                    <i class="fa-solid fa-user"></i> {{ user.first_name|default:user.username }} 
-                    ({{ user.get_role_display }})
-                </span>
-                <a href="{% url 'logout' %}" class="btn btn-secondary btn-sm">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
+                <!-- Dropdown Menu trigger by 3-line hamburger icon -->
+                <div class="nav-dropdown">
+                    <span class="nav-user-badge nav-dropdown-trigger">
+                        <i class="fa-solid fa-bars"></i> &nbsp; {{ user.first_name|default:user.username }}
+                    </span>
+                    <div class="nav-dropdown-menu">
+                        <a href="{% url 'user_dashboard' %}">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Upload Status
+                        </a>
+                        <a href="{% url 'change_password' %}">
+                            <i class="fa-solid fa-key"></i> Change Password
+                        </a>
+                        {% if user.role == 'faculty' or user.role == 'superuser' or user.is_superuser %}
+                            <div class="divider"></div>
+                            <a href="{% url 'admin_dashboard' %}">
+                                <i class="fa-solid fa-gauge"></i> Admin Dashboard
+                            </a>
+                        {% endif %}
+                        <div class="divider"></div>
+                        <a href="{% url 'logout' %}" style="color: var(--danger);">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </a>
+                    </div>
+                </div>
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Login</a>
                 <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>

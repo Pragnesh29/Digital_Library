@@ -4,23 +4,57 @@
 <div class="catalog-header">
     <div class="catalog-title">
         <h2>Faculty & Admin Dashboard</h2>
-        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.25rem;">Review registrations, content uploads, and manage highlighted documents for the homepage carousel.</p>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 0.25rem;">Review registrations, content uploads, manage highlighted documents, and administer users/files.</p>
     </div>
 </div>
 
+<!-- Super Admin Department & Group Operations Shortcut -->
+{% if user.role == 'superuser' or user.is_superuser %}
+    <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.2); border-radius: 12px;">
+        <div>
+            <h3 style="font-size: 1.1rem; color: #a5b4fc;"><i class="fa-solid fa-screwdriver-wrench"></i> Administrative Operations</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">As a Super Admin, you can directly create, edit, and delete Divisions/Departments and Groups using Django Admin.</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="/admin/accounts/department/" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; background: rgba(255,255,255,0.05);">
+                <i class="fa-solid fa-building-user"></i> Manage Departments
+            </a>
+            <a href="/admin/accounts/group/" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; background: rgba(255,255,255,0.05);">
+                <i class="fa-solid fa-people-group"></i> Manage Groups
+            </a>
+        </div>
+    </div>
+{% endif %}
+
 <div class="tabs-header">
-    <button class="tab-btn active" onclick="openTab(event, 'users-tab')">
+    <button class="tab-btn active" id="btn-users-tab" onclick="openTab(event, 'users-tab')">
         <i class="fa-solid fa-users-gear"></i> Pending Users ({{ pending_users.count }})
     </button>
-    <button class="tab-btn" onclick="openTab(event, 'books-tab')">
+    <button class="tab-btn" id="btn-books-tab" onclick="openTab(event, 'books-tab')">
         <i class="fa-solid fa-book-medical"></i> Pending Books ({{ pending_books.count }})
     </button>
-    <button class="tab-btn" onclick="openTab(event, 'articles-tab')">
+    <button class="tab-btn" id="btn-articles-tab" onclick="openTab(event, 'articles-tab')">
         <i class="fa-solid fa-folder-plus"></i> Pending Articles ({{ pending_articles.count }})
     </button>
-    <button class="tab-btn" onclick="openTab(event, 'highlights-tab')">
+    <button class="tab-btn" id="btn-highlights-tab" onclick="openTab(event, 'highlights-tab')">
         <i class="fa-solid fa-star"></i> Highlight Manager
     </button>
+    {% if user.role == 'superuser' or user.is_superuser %}
+        <button class="tab-btn" id="btn-all-users-tab" onclick="openTab(event, 'all-users-tab')">
+            <i class="fa-solid fa-users"></i> All Users ({{ all_users.count }})
+        </button>
+    {% endif %}
+    <button class="tab-btn" id="btn-all-books-tab" onclick="openTab(event, 'all-books-tab')">
+        <i class="fa-solid fa-book"></i> All Books ({{ all_books.count }})
+    </button>
+    <button class="tab-btn" id="btn-all-articles-tab" onclick="openTab(event, 'all-articles-tab')">
+        <i class="fa-regular fa-newspaper"></i> All Articles ({{ all_articles.count }})
+    </button>
+    {% if user.role == 'superuser' or user.is_superuser %}
+        <button class="tab-btn" id="btn-logs-tab" onclick="openTab(event, 'logs-tab')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Activity Logs ({{ audit_logs.count }})
+        </button>
+    {% endif %}
 </div>
 
 <!-- Pending Users Tab -->
@@ -229,14 +263,14 @@
                                 <tr>
                                     <td>{{ book.title }}</td>
                                     <td>
-                                        <form method="POST" action="{% url 'toggle_highlight' 'book' book.pk %}">
+                                        <form method="POST" action="{% url 'toggle_highlight' 'book' book.pk %}" style="display: inline-block;">
                                             {% csrf_token %}
                                             {% if book.is_highlighted %}
-                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
                                                     <i class="fa-solid fa-star"></i> Featured
                                                 </button>
                                             {% else %}
-                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
                                                     <i class="fa-regular fa-star"></i> Highlight
                                                 </button>
                                             {% endif %}
@@ -269,14 +303,14 @@
                                 <tr>
                                     <td>{{ article.title }}</td>
                                     <td>
-                                        <form method="POST" action="{% url 'toggle_highlight' 'article' article.pk %}">
+                                        <form method="POST" action="{% url 'toggle_highlight' 'article' article.pk %}" style="display: inline-block;">
                                             {% csrf_token %}
                                             {% if article.is_highlighted %}
-                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
                                                     <i class="fa-solid fa-star"></i> Featured
                                                 </button>
                                             {% else %}
-                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
                                                     <i class="fa-regular fa-star"></i> Highlight
                                                 </button>
                                             {% endif %}
@@ -293,6 +327,258 @@
         </div>
     </div>
 </div>
+
+{% if user.role == 'superuser' or user.is_superuser %}
+<!-- All Users Tab -->
+<div id="all-users-tab" class="tab-content">
+    <!-- User Search Form -->
+    <div style="margin-bottom: 1.5rem; max-width: 450px;">
+        <input type="text" id="search-user-input" class="form-control" placeholder="Search users by name, email, or username instantly...">
+    </div>
+
+    <div class="glass table-container" style="padding: 1rem;">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Dept / Group</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                {% for sys_user in all_users %}
+                    <tr class="user-row">
+                        <td><strong>{{ sys_user.username }}</strong></td>
+                        <td>{{ sys_user.first_name }}</td>
+                        <td>{{ sys_user.email }}</td>
+                        <td>
+                            <span class="nav-user-badge" style="font-size: 0.8rem; text-transform: uppercase;">
+                                {{ sys_user.get_role_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ sys_user.department.name|default:"-" }}<br>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">Group: {{ sys_user.group.name|default:"-" }}</span>
+                        </td>
+                        <td>
+                            {% if sys_user.is_approved %}
+                                <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                            {% else %}
+                                <span class="badge badge-pending"><i class="fa-solid fa-clock"></i> Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <a href="{% url 'reset_user_password' sys_user.pk %}" class="btn btn-secondary btn-sm" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: #fbbf24; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-key"></i> Password
+                                </a>
+                                {% if sys_user.pk != user.pk %}
+                                    <form method="POST" action="{% url 'delete_user' sys_user.pk %}" onsubmit="return confirm('WARNING: Are you sure you want to permanently delete user \'{{ sys_user.username|escapejs }}\'? This action will delete their account and cannot be undone.');" style="display: inline-block;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm" style="font-size: 0.8rem;">
+                                            <i class="fa-solid fa-user-slash"></i> Delete
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr id="no-users-row" style="display: none;">
+                    <td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                        <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No matching user records found.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- All Books Tab -->
+<div id="all-books-tab" class="tab-content">
+    <!-- Book Search Form -->
+    <div style="margin-bottom: 1.5rem; max-width: 450px;">
+        <input type="text" id="search-book-input" class="form-control" placeholder="Search books by title instantly...">
+    </div>
+
+    <div class="glass table-container" style="padding: 1rem;">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Uploaded By</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="books-table-body">
+                {% if all_books %}
+                    {% for book in all_books %}
+                        <tr class="book-row">
+                            <td>
+                                <strong>{{ book.title }}</strong>
+                                {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
+                                    <span style="font-size: 0.75rem; color: var(--danger); margin-left: 0.5rem;" title="Visible only to target departments or groups"><i class="fa-solid fa-lock"></i> Restricted</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99,102,241,0.1);">{{ book.category_tag }}</span></td>
+                            <td>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
+                            <td>
+                                {% if book.is_approved %}
+                                    <span class="badge badge-approved">Approved</span>
+                                {% else %}
+                                    <span class="badge badge-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary btn-sm" target="_blank">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </a>
+                                    <a href="{% url 'edit_book' book.pk %}" class="btn btn-secondary btn-sm" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <form method="POST" action="{% url 'delete_book' book.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete the book \'{{ book.title|escapejs }}\'? This action will delete the PDF and cover page.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash-can"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                <tr id="no-books-row" {% if all_books %}style="display: none;"{% endif %}>
+                    <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                        <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No matching book records found.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- All Articles Tab -->
+<div id="all-articles-tab" class="tab-content">
+    <!-- Article Search Form -->
+    <div style="margin-bottom: 1.5rem; max-width: 450px;">
+        <input type="text" id="search-article-input" class="form-control" placeholder="Search articles by title instantly...">
+    </div>
+
+    <div class="glass table-container" style="padding: 1rem;">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Uploaded By</th>
+                    <th>Photos</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="articles-table-body">
+                {% if all_articles %}
+                    {% for article in all_articles %}
+                        <tr class="article-row">
+                            <td><strong>{{ article.title }}</strong></td>
+                            <td>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
+                            <td>{{ article.images.count }} photos</td>
+                            <td>
+                                {% if article.is_approved %}
+                                    <span class="badge badge-approved">Approved</span>
+                                {% else %}
+                                    <span class="badge badge-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <a href="{% url 'article_detail' article.pk %}" class="btn btn-secondary btn-sm" target="_blank">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </a>
+                                    <a href="{% url 'edit_article' article.pk %}" class="btn btn-secondary btn-sm" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <form method="POST" action="{% url 'delete_article' article.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete the article \'{{ article.title|escapejs }}\'?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash-can"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                <tr id="no-articles-row" {% if all_articles %}style="display: none;"{% endif %}>
+                    <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                        <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No matching article records found.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if user.role == 'superuser' or user.is_superuser %}
+<!-- Activity Logs Tab -->
+<div id="logs-tab" class="tab-content">
+    <!-- Log Search & Dropdown Filter -->
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; max-width: 750px;">
+        <input type="text" id="search-log-input" class="form-control" placeholder="Search activity logs instantly..." style="flex: 2;">
+        <select id="log-type-filter" class="form-control" style="flex: 1;">
+            <option value="">-- All Activity Types --</option>
+            <option value="user">User & Password Actions</option>
+            <option value="book">Book Actions</option>
+            <option value="article">Article Actions</option>
+        </select>
+    </div>
+
+    <div class="glass table-container" style="padding: 1rem;">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th style="width: 180px;">Timestamp</th>
+                    <th style="width: 150px;">Performed By</th>
+                    <th style="width: 200px;">Action Type</th>
+                    <th>Log Details</th>
+                </tr>
+            </thead>
+            <tbody id="logs-table-body">
+                {% if audit_logs %}
+                    {% for log in audit_logs %}
+                        <tr class="log-row" data-type="{% if 'user' in log.action|lower or 'password' in log.action|lower or 'registration' in log.action|lower %}user{% elif 'book' in log.action|lower %}book{% elif 'article' in log.action|lower %}article{% else %}other{% endif %}">
+                            <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                            <td><strong>{{ log.user.username|default:"System / Guest" }}</strong></td>
+                            <td>
+                                <span class="nav-user-badge" style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); color: #a5b4fc;">
+                                    {{ log.action }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.9rem; color: var(--text-secondary);">{{ log.details }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                <tr id="no-logs-row" {% if audit_logs %}style="display: none;"{% endif %}>
+                    <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                        <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No matching activity logs found.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -310,5 +596,88 @@
         document.getElementById(tabId).classList.add("active");
         evt.currentTarget.classList.add("active");
     }
+
+    // Instant table-row text filtering function
+    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        input.addEventListener('input', function() {
+            const filterValue = input.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.' + rowClassName);
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(filterValue)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const noResultsRow = document.getElementById(noResultsRowId);
+            if (noResultsRow) {
+                if (visibleCount === 0) {
+                    noResultsRow.style.display = '';
+                } else {
+                    noResultsRow.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Custom filtering for Logs (combines search input + dropdown filter)
+    function filterLogs() {
+        const searchInput = document.getElementById('search-log-input');
+        const typeFilter = document.getElementById('log-type-filter');
+        if (!searchInput || !typeFilter) return;
+
+        const searchVal = searchInput.value.toLowerCase().trim();
+        const typeVal = typeFilter.value;
+
+        const rows = document.querySelectorAll('.log-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const type = row.getAttribute('data-type');
+
+            let matchesSearch = !searchVal || text.includes(searchVal);
+            let matchesType = !typeVal || type === typeVal;
+
+            if (matchesSearch && matchesType) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const noResultsRow = document.getElementById('no-logs-row');
+        if (noResultsRow) {
+            if (visibleCount === 0) {
+                noResultsRow.style.display = '';
+            } else {
+                noResultsRow.style.display = 'none';
+            }
+        }
+    }
+
+    // Initial setup on DOM Content Loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row');
+        setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row');
+        setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row');
+        
+        // Log tab filters
+        const searchLogInput = document.getElementById('search-log-input');
+        const logTypeFilter = document.getElementById('log-type-filter');
+        if (searchLogInput && logTypeFilter) {
+            searchLogInput.addEventListener('input', filterLogs);
+            logTypeFilter.addEventListener('change', filterLogs);
+        }
+    });
 </script>
 {% endblock %}
