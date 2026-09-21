@@ -185,9 +185,19 @@
                                         </button>
                                     </form>
                                     {% if book.status == 'rejected' %}
-                                        <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.65; cursor: not-allowed; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-                                            <i class="fa-solid fa-xmark"></i> Rejected
-                                        </button>
+                                        <div class="rejected-btn-wrapper" title="Rejection Reason: {{ book.rejection_remark|default:'No remarks provided' }}">
+                                            <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.75; cursor: help; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); pointer-events: auto;">
+                                                <i class="fa-solid fa-xmark"></i> Rejected
+                                            </button>
+                                            <div class="rejection-tooltip">
+                                                <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 0.75rem; color: #fca5a5; display: flex; align-items: center; gap: 0.35rem;">
+                                                    <i class="fa-solid fa-comment-dots"></i> Rejection Reason:
+                                                </div>
+                                                <div style="color: #f87171; font-size: 0.78rem;">
+                                                    {{ book.rejection_remark|default:"No remarks provided"|truncatechars:100 }}
+                                                </div>
+                                            </div>
+                                        </div>
                                     {% else %}
                                         <form method="POST" action="{% url 'approve_book' book.pk %}" onsubmit="return promptRejectionReason(this, '{{ book.title|escapejs }}');">
                                             {% csrf_token %}
@@ -257,9 +267,19 @@
                                         </button>
                                     </form>
                                     {% if article.status == 'rejected' %}
-                                        <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.65; cursor: not-allowed; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-                                            <i class="fa-solid fa-xmark"></i> Rejected
-                                        </button>
+                                        <div class="rejected-btn-wrapper" title="Rejection Reason: {{ article.rejection_remark|default:'No remarks provided' }}">
+                                            <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.75; cursor: help; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); pointer-events: auto;">
+                                                <i class="fa-solid fa-xmark"></i> Rejected
+                                            </button>
+                                            <div class="rejection-tooltip">
+                                                <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 0.75rem; color: #fca5a5; display: flex; align-items: center; gap: 0.35rem;">
+                                                    <i class="fa-solid fa-comment-dots"></i> Rejection Reason:
+                                                </div>
+                                                <div style="color: #f87171; font-size: 0.78rem;">
+                                                    {{ article.rejection_remark|default:"No remarks provided"|truncatechars:100 }}
+                                                </div>
+                                            </div>
+                                        </div>
                                     {% else %}
                                         <form method="POST" action="{% url 'approve_article' article.pk %}" onsubmit="return promptRejectionReason(this, '{{ article.title|escapejs }}');">
                                             {% csrf_token %}
@@ -694,12 +714,17 @@
                                 {% if book.status == 'approved' or book.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                 {% elif book.status == 'rejected' %}
-                                    <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
-                                    {% if book.rejection_remark %}
-                                        <div style="font-size: 0.75rem; color: #f87171; margin-top: 0.2rem;" title="{{ book.rejection_remark }}">
-                                            <i class="fa-solid fa-comment-dots"></i> {{ book.rejection_remark|truncatechars:20 }}
+                                    <div class="rejected-btn-wrapper" style="display: inline-block;" title="Rejection Reason: {{ book.rejection_remark|default:'No remarks provided' }}">
+                                        <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); cursor: help;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                        <div class="rejection-tooltip">
+                                            <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 0.75rem; color: #fca5a5; display: flex; align-items: center; gap: 0.35rem;">
+                                                <i class="fa-solid fa-comment-dots"></i> Rejection Reason:
+                                            </div>
+                                            <div style="color: #f87171; font-size: 0.78rem;">
+                                                {{ book.rejection_remark|default:"No remarks provided"|truncatechars:100 }}
+                                            </div>
                                         </div>
-                                    {% endif %}
+                                    </div>
                                 {% else %}
                                     <span class="badge badge-pending"><i class="fa-solid fa-clock"></i> Pending</span>
                                 {% endif %}
@@ -763,12 +788,17 @@
                                 {% if article.status == 'approved' or article.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                 {% elif article.status == 'rejected' %}
-                                    <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
-                                    {% if article.rejection_remark %}
-                                        <div style="font-size: 0.75rem; color: #f87171; margin-top: 0.2rem;" title="{{ article.rejection_remark }}">
-                                            <i class="fa-solid fa-comment-dots"></i> {{ article.rejection_remark|truncatechars:20 }}
+                                    <div class="rejected-btn-wrapper" style="display: inline-block;" title="Rejection Reason: {{ article.rejection_remark|default:'No remarks provided' }}">
+                                        <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); cursor: help;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                        <div class="rejection-tooltip">
+                                            <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 0.75rem; color: #fca5a5; display: flex; align-items: center; gap: 0.35rem;">
+                                                <i class="fa-solid fa-comment-dots"></i> Rejection Reason:
+                                            </div>
+                                            <div style="color: #f87171; font-size: 0.78rem;">
+                                                {{ article.rejection_remark|default:"No remarks provided"|truncatechars:100 }}
+                                            </div>
                                         </div>
-                                    {% endif %}
+                                    </div>
                                 {% else %}
                                     <span class="badge badge-pending"><i class="fa-solid fa-clock"></i> Pending</span>
                                 {% endif %}
