@@ -114,19 +114,12 @@ USE_I18N = True
 USE_TZ = True
 
 
-# ── Sub‑path & Static/Media configuration ────────────────────────────────
-FORCE_SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', '/digital_library')
-
-if FORCE_SCRIPT_NAME:
-    STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
-    MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
-else:
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
-
+# ── Static & Media configuration ─────────────────────────────────────────
+STATIC_URL = '/digital_library/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = '/digital_library/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
