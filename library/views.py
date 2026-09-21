@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import Book, Article, ArticleImage, ArticleAttachment, AuditLog
+from .models import Category, Book, Article, ArticleImage, ArticleAttachment, AuditLog
 from .forms import BookUploadForm, ArticleUploadForm
 from .utils import log_action
 from accounts.models import CustomUser, Department, Group
