@@ -429,6 +429,21 @@ def manage_departments_view(request):
                     messages.info(request, f"Department '{name}' already exists.")
             else:
                 messages.error(request, "Department name cannot be empty.")
+        elif action == 'edit':
+            dept_id = request.POST.get('department_id')
+            dept = get_object_or_404(Department, pk=dept_id)
+            new_name = request.POST.get('name', '').strip()
+            if new_name:
+                if Department.objects.filter(name=new_name).exclude(pk=dept_id).exists():
+                    messages.error(request, f"Department '{new_name}' already exists.")
+                else:
+                    old_name = dept.name
+                    dept.name = new_name
+                    dept.save()
+                    messages.success(request, f"Department '{old_name}' updated to '{new_name}' successfully.")
+                    log_action(user, "Department Updated", f"Renamed department from '{old_name}' to '{new_name}'")
+            else:
+                messages.error(request, "Department name cannot be empty.")
         elif action == 'delete':
             dept_id = request.POST.get('department_id')
             dept = get_object_or_404(Department, pk=dept_id)
@@ -457,6 +472,21 @@ def manage_groups_view(request):
                     log_action(user, "Group Created", f"Created group '{name}'")
                 else:
                     messages.info(request, f"Group '{name}' already exists.")
+            else:
+                messages.error(request, "Group name cannot be empty.")
+        elif action == 'edit':
+            grp_id = request.POST.get('group_id')
+            grp = get_object_or_404(Group, pk=grp_id)
+            new_name = request.POST.get('name', '').strip()
+            if new_name:
+                if Group.objects.filter(name=new_name).exclude(pk=grp_id).exists():
+                    messages.error(request, f"Group '{new_name}' already exists.")
+                else:
+                    old_name = grp.name
+                    grp.name = new_name
+                    grp.save()
+                    messages.success(request, f"Group '{old_name}' updated to '{new_name}' successfully.")
+                    log_action(user, "Group Updated", f"Renamed group from '{old_name}' to '{new_name}'")
             else:
                 messages.error(request, "Group name cannot be empty.")
         elif action == 'delete':
@@ -493,6 +523,23 @@ def manage_categories_view(request):
                     cat.target_type = target_type
                     cat.save()
                     messages.info(request, f"Category '{name}' target type updated to {target_type}.")
+            else:
+                messages.error(request, "Category name cannot be empty.")
+        elif action == 'edit':
+            cat_id = request.POST.get('category_id')
+            cat = get_object_or_404(Category, pk=cat_id)
+            new_name = request.POST.get('name', '').strip()
+            target_type = request.POST.get('target_type', 'both')
+            if new_name:
+                if Category.objects.filter(name=new_name).exclude(pk=cat_id).exists():
+                    messages.error(request, f"Category '{new_name}' already exists.")
+                else:
+                    old_name = cat.name
+                    cat.name = new_name
+                    cat.target_type = target_type
+                    cat.save()
+                    messages.success(request, f"Category '{old_name}' updated successfully.")
+                    log_action(user, "Category Updated", f"Updated category '{old_name}' -> '{new_name}' ({target_type})")
             else:
                 messages.error(request, "Category name cannot be empty.")
         elif action == 'delete':
