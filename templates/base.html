@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sarvatra GyanKosh{% endblock %}</title>
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,12 +65,19 @@
                             </a>
                         {% endif %}
                         <div class="divider"></div>
+                        <button type="button" class="theme-toggle-item" onclick="toggleTheme()">
+                            <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
+                        </button>
+                        <div class="divider"></div>
                         <a href="{% url 'logout' %}" style="color: var(--danger);">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </a>
                     </div>
                 </div>
             {% else %}
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="padding: 0.4rem 0.65rem;">
+                    <i class="fa-solid fa-moon" id="themeIconGuest"></i>
+                </button>
                 <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Login</a>
                 <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
             {% endif %}
@@ -98,6 +111,45 @@
     <footer>
         <p>&copy; {% now "Y" %} Sarvatra GyanKosh. All rights reserved.</p>
     </footer>
+
+    <!-- Global Theme Script -->
+    <script>
+        function updateThemeUI(theme) {
+            var icons = document.querySelectorAll('#themeIcon, #themeIconGuest');
+            var texts = document.querySelectorAll('#themeText');
+            
+            icons.forEach(function(icon) {
+                if (theme === 'light') {
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#f59e0b';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                    icon.style.color = '#a5b4fc';
+                }
+            });
+            
+            texts.forEach(function(text) {
+                text.textContent = theme === 'light' ? 'Light Mode' : 'Dark Mode';
+            });
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateThemeUI(theme);
+        }
+
+        function toggleTheme() {
+            var currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            var newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var currentTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme') || 'dark';
+            updateThemeUI(currentTheme);
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>
