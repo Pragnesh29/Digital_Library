@@ -33,9 +33,15 @@
                 <p class="article-desc">{{ article.description }}</p>
                 
                 <div class="article-meta">
-                    <span>
-                        <i class="fa-solid fa-user"></i> {{ article.uploaded_by.first_name|default:article.uploaded_by.username }}
-                    </span>
+                    {% if article.show_uploader %}
+                        <span>
+                            <i class="fa-solid fa-user"></i> {{ article.uploaded_by.first_name|default:article.uploaded_by.username }}
+                        </span>
+                    {% elif user.is_staff or user.role == 'admin' or user.role == 'faculty' %}
+                        <span>
+                            <i class="fa-solid fa-user"></i> {{ article.uploaded_by.first_name|default:article.uploaded_by.username }} <small style="color: var(--text-secondary);">(Hidden)</small>
+                        </span>
+                    {% endif %}
                     <span>
                         <i class="fa-solid fa-images"></i> {{ article.images.count }} photos
                     </span>

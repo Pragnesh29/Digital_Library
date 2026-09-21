@@ -53,6 +53,12 @@
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
             {% endfor %}
         </div>
+
+        <div class="form-group" style="margin-top: 1rem; margin-bottom: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-weight: 500; color: var(--text-primary);">
+                {{ form.show_uploader }} {{ form.show_uploader.label }}
+            </label>
+        </div>
         
         <!-- Permissions Restriction Panel -->
         <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem; margin-bottom: 1.5rem;">

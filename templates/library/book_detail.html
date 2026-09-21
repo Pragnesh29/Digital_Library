@@ -36,7 +36,11 @@
         <h1>{{ book.title }}</h1>
         
         <div class="detail-meta-row">
-            <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</strong></span>
+            {% if book.show_uploader %}
+                <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</strong></span>
+            {% elif user.is_staff or user.role == 'admin' or user.role == 'faculty' %}
+                <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</strong> <small style="color: var(--text-secondary);">(Hidden Publicly)</small></span>
+            {% endif %}
             <span><i class="fa-solid fa-calendar-days" style="color: var(--accent-violet); margin-right: 0.25rem;"></i> Added on: <strong>{{ book.created_at|date:"M d, Y" }}</strong></span>
         </div>
         

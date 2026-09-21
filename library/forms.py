@@ -17,6 +17,11 @@ class MultipleFileField(forms.FileField):
         return [single_file_clean(data, initial)]
 
 class BookUploadForm(forms.ModelForm):
+    show_uploader = forms.BooleanField(
+        initial=True,
+        required=False,
+        label="Show 'Uploaded By' name publicly"
+    )
     restricted_to_departments = forms.ModelMultipleChoiceField(
         queryset=Department.objects.all(),
         required=False,
@@ -32,7 +37,7 @@ class BookUploadForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ['title', 'pdf', 'cover_image', 'category_tag', 'restricted_to_departments', 'restricted_to_groups']
+        fields = ['title', 'pdf', 'cover_image', 'category_tag', 'show_uploader', 'restricted_to_departments', 'restricted_to_groups']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +47,11 @@ class BookUploadForm(forms.ModelForm):
             self.fields[name].widget.attrs['placeholder'] = f'Enter {self.fields[name].label}'
 
 class ArticleUploadForm(forms.ModelForm):
+    show_uploader = forms.BooleanField(
+        initial=True,
+        required=False,
+        label="Show 'Uploaded By' name publicly"
+    )
     images = MultipleFileField(
         required=False,
         label="Upload Photos (Select multiple files)"
@@ -49,7 +59,7 @@ class ArticleUploadForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ['title', 'description', 'images']
+        fields = ['title', 'description', 'show_uploader', 'images']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

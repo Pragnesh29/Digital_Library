@@ -7,6 +7,7 @@ class Book(models.Model):
     cover_image = models.ImageField(upload_to='books/covers/', blank=True, null=True)
     category_tag = models.CharField(max_length=50)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='uploaded_books')
+    show_uploader = models.BooleanField(default=True, verbose_name="Show Uploader Name")
     is_approved = models.BooleanField(default=False)
     is_highlighted = models.BooleanField(default=False)
     
@@ -23,6 +24,7 @@ class Article(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='uploaded_articles')
+    show_uploader = models.BooleanField(default=True, verbose_name="Show Uploader Name")
     is_approved = models.BooleanField(default=False)
     is_highlighted = models.BooleanField(default=False)
     

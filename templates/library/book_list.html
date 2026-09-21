@@ -73,7 +73,11 @@
                 <div class="book-details">
                     <span class="book-category">{{ book.category_tag }}</span>
                     <h3 class="book-title">{{ book.title }}</h3>
-                    <p class="book-author">Uploaded by: {{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</p>
+                    {% if book.show_uploader %}
+                        <p class="book-author">Uploaded by: {{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</p>
+                    {% elif user.is_staff or user.role == 'admin' or user.role == 'faculty' %}
+                        <p class="book-author" style="opacity: 0.75;">Uploaded by: {{ book.uploaded_by.first_name|default:book.uploaded_by.username }} <small style="color: var(--text-secondary);">(Hidden Publicly)</small></p>
+                    {% endif %}
                     <div class="book-action">
                         <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary btn-sm" style="width: 100%;">
                             Read details & PDF <i class="fa-solid fa-angle-right"></i>
