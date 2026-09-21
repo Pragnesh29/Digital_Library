@@ -23,8 +23,13 @@ from django.shortcuts import redirect
 def root_redirect(request):
     return redirect('/SarvatraGyanKosh/')
 
+def admin_redirect(request, subpath=''):
+    return redirect(f'/SarvatraGyanKosh/admin/{subpath}')
+
 urlpatterns = [
     path('', root_redirect),
+    path('admin/<path:subpath>', admin_redirect),
+    path('admin/', admin_redirect),
     path('SarvatraGyanKosh/', include([
         path('admin/', admin.site.urls),
         path('accounts/', include('accounts.urls')),
