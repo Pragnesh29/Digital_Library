@@ -163,7 +163,7 @@
                                 </a>
                             </td>
                             <td>
-                                <div style="display: flex; gap: 0.5rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <form method="POST" action="{% url 'approve_book' book.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="approve">
@@ -171,11 +171,18 @@
                                             <i class="fa-solid fa-check"></i> Approve
                                         </button>
                                     </form>
-                                    <form method="POST" action="{% url 'approve_book' book.pk %}" onsubmit="return confirm('Are you sure you want to reject and delete this book upload?');">
+                                    <form method="POST" action="{% url 'approve_book' book.pk %}" onsubmit="return promptRejectionReason(this, '{{ book.title|escapejs }}');">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="reject">
-                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                        <input type="hidden" name="rejection_remark" value="">
+                                        <button type="submit" class="btn btn-warning btn-sm" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: none;">
                                             <i class="fa-solid fa-xmark"></i> Reject
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'delete_book' book.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete the book \'{{ book.title|escapejs }}\'? This action will delete the PDF and cover page.');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                            <i class="fa-solid fa-trash-can"></i> Delete
                                         </button>
                                     </form>
                                 </div>
@@ -222,7 +229,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div style="display: flex; gap: 0.5rem;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
                                     <form method="POST" action="{% url 'approve_article' article.pk %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="approve">
@@ -230,11 +237,18 @@
                                             <i class="fa-solid fa-check"></i> Approve
                                         </button>
                                     </form>
-                                    <form method="POST" action="{% url 'approve_article' article.pk %}" onsubmit="return confirm('Are you sure you want to reject and delete this article?');">
+                                    <form method="POST" action="{% url 'approve_article' article.pk %}" onsubmit="return promptRejectionReason(this, '{{ article.title|escapejs }}');">
                                         {% csrf_token %}
                                         <input type="hidden" name="action" value="reject">
-                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                        <input type="hidden" name="rejection_remark" value="">
+                                        <button type="submit" class="btn btn-warning btn-sm" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: none;">
                                             <i class="fa-solid fa-xmark"></i> Reject
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'delete_article' article.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete the article \'{{ article.title|escapejs }}\'?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                            <i class="fa-solid fa-trash-can"></i> Delete
                                         </button>
                                     </form>
                                 </div>
@@ -522,10 +536,17 @@
                             <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99,102,241,0.1);">{{ book.category_tag }}</span></td>
                             <td>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
                             <td>
-                                {% if book.is_approved %}
-                                    <span class="badge badge-approved">Approved</span>
+                                {% if book.status == 'approved' or book.is_approved %}
+                                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                {% elif book.status == 'rejected' %}
+                                    <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                    {% if book.rejection_remark %}
+                                        <div style="font-size: 0.75rem; color: #f87171; margin-top: 0.2rem;" title="{{ book.rejection_remark }}">
+                                            <i class="fa-solid fa-comment-dots"></i> {{ book.rejection_remark|truncatechars:20 }}
+                                        </div>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="badge badge-pending">Pending</span>
+                                    <span class="badge badge-pending"><i class="fa-solid fa-clock"></i> Pending</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -584,10 +605,17 @@
                             <td>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
                             <td>{{ article.images.count }} photos</td>
                             <td>
-                                {% if article.is_approved %}
-                                    <span class="badge badge-approved">Approved</span>
+                                {% if article.status == 'approved' or article.is_approved %}
+                                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                {% elif article.status == 'rejected' %}
+                                    <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                    {% if article.rejection_remark %}
+                                        <div style="font-size: 0.75rem; color: #f87171; margin-top: 0.2rem;" title="{{ article.rejection_remark }}">
+                                            <i class="fa-solid fa-comment-dots"></i> {{ article.rejection_remark|truncatechars:20 }}
+                                        </div>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="badge badge-pending">Pending</span>
+                                    <span class="badge badge-pending"><i class="fa-solid fa-clock"></i> Pending</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -789,6 +817,26 @@
 
 {% block extra_js %}
 <script>
+    function promptRejectionReason(form, title) {
+        var reason = prompt('Please enter rejection reason/remarks for "' + title + '":');
+        if (reason === null) {
+            return false;
+        }
+        reason = reason.trim();
+        if (!reason) {
+            alert('Rejection reason is required.');
+            return false;
+        }
+        var hiddenInput = form.querySelector('input[name="rejection_remark"]');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'rejection_remark';
+            form.appendChild(hiddenInput);
+        }
+        hiddenInput.value = reason;
+        return true;
+    }
     function filterFeedbackStatus(status, btn) {
         const filterBtns = document.querySelectorAll('.fb-filter-btn');
         filterBtns.forEach(b => {

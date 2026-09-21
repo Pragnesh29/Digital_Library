@@ -476,15 +476,19 @@ def approve_book_view(request, book_id):
         action = request.POST.get('action')
         if action == 'approve':
             book.is_approved = True
+            book.status = 'approved'
+            book.rejection_remark = ''
             book.save()
             messages.success(request, f"Book '{book.title}' has been approved.")
             log_action(user, "Book Approved", f"Approved book '{book.title}' (Uploaded by: {book.uploaded_by.username})")
         elif action == 'reject':
-            title = book.title
-            uploaded_by = book.uploaded_by.username
-            book.delete()
-            messages.warning(request, f"Book '{title}' upload was rejected.")
-            log_action(user, "Book Upload Rejected", f"Rejected and deleted pending book '{title}' (Uploaded by: {uploaded_by})")
+            remark = request.POST.get('rejection_remark', '').strip()
+            book.is_approved = False
+            book.status = 'rejected'
+            book.rejection_remark = remark
+            book.save()
+            messages.warning(request, f"Book '{book.title}' upload was marked as Rejected.")
+            log_action(user, "Book Upload Rejected", f"Marked book '{book.title}' as Rejected (Uploaded by: {book.uploaded_by.username}). Reason: {remark or 'No reason provided'}")
             
     return redirect_to_admin_dashboard(request, 'books-tab')
 
@@ -500,17 +504,80 @@ def approve_article_view(request, article_id):
         action = request.POST.get('action')
         if action == 'approve':
             article.is_approved = True
+            article.status = 'approved'
+            article.rejection_remark = ''
             article.save()
             messages.success(request, f"Article '{article.title}' has been approved.")
             log_action(user, "Article Approved", f"Approved article '{article.title}' (Uploaded by: {article.uploaded_by.username})")
         elif action == 'reject':
-            title = article.title
-            uploaded_by = article.uploaded_by.username
-            article.delete()
-            messages.warning(request, f"Article '{title}' upload was rejected.")
-            log_action(user, "Article Upload Rejected", f"Rejected and deleted pending article '{title}' (Uploaded by: {uploaded_by})")
+            remark = request.POST.get('rejection_remark', '').strip()
+            article.is_approved = False
+            article.status = 'rejected'
+            article.rejection_remark = remark
+            article.save()
+            messages.warning(request, f"Article '{article.title}' upload was marked as Rejected.")
+            log_action(user, "Article Upload Rejected", f"Marked article '{article.title}' as Rejected (Uploaded by: {article.uploaded_by.username}). Reason: {remark or 'No reason provided'}")
             
     return redirect_to_admin_dashboard(request, 'articles-tab')
+
+@login_required
+def user_edit_book_view(request, pk):
+    book = get_object_or_404(Book, pk=pk, uploaded_by=request.user)
+    if request.method == 'POST':
+        form = BookUploadForm(request.POST, request.FILES, instance=book)
+        if form.is_valid():
+            updated_book = form.save(commit=False)
+            if updated_book.category:
+                updated_book.category_tag = updated_book.category.name
+            updated_book.is_approved = False
+            updated_book.status = 'pending'
+            updated_book.save()
+            form.save_m2m()
+            
+            messages.success(request, f"Book '{updated_book.title}' updated successfully and resubmitted for approval!")
+            log_action(request.user, "Book Resubmitted", f"Updated and resubmitted book '{updated_book.title}' for approval")
+            return redirect('user_dashboard')
+        else:
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Failed to update book! Reason: {errors_detail}")
+    else:
+        form = BookUploadForm(instance=book)
+        
+    return render(request, 'library/user_edit_book.html', {'form': form, 'book': book})
+
+@login_required
+def user_edit_article_view(request, pk):
+    article = get_object_or_404(Article, pk=pk, uploaded_by=request.user)
+    if request.method == 'POST':
+        form = ArticleUploadForm(request.POST, request.FILES, instance=article)
+        if form.is_valid():
+            updated_article = form.save(commit=False)
+            updated_article.is_approved = False
+            updated_article.status = 'pending'
+            updated_article.save()
+            form.save_m2m()
+            
+            uploaded_files = request.FILES.getlist('files') or request.FILES.getlist('attachments') or request.FILES.getlist('images')
+            for f in uploaded_files:
+                ArticleAttachment.objects.create(
+                    article=updated_article,
+                    file=f,
+                    file_name=f.name
+                )
+                ext = f.name.split('.')[-1].lower()
+                if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']:
+                    ArticleImage.objects.create(article=updated_article, image=f)
+                    
+            messages.success(request, f"Article '{updated_article.title}' updated successfully and resubmitted for approval!")
+            log_action(request.user, "Article Resubmitted", f"Updated and resubmitted article '{updated_article.title}' for approval")
+            return redirect('user_dashboard')
+        else:
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Failed to update article! Reason: {errors_detail}")
+    else:
+        form = ArticleUploadForm(instance=article)
+        
+    return render(request, 'library/user_edit_article.html', {'form': form, 'article': article})
 
 @login_required
 def toggle_highlight_view(request, content_type, pk):

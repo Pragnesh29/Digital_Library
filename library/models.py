@@ -19,6 +19,12 @@ class Category(models.Model):
         return self.name
 
 
+STATUS_CHOICES = (
+    ('pending', 'Pending Approval'),
+    ('approved', 'Approved'),
+    ('rejected', 'Rejected'),
+)
+
 class Book(models.Model):
     title = models.CharField(max_length=200)
     pdf = models.FileField(upload_to='books/pdfs/')
@@ -28,6 +34,8 @@ class Book(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='uploaded_books')
     show_uploader = models.BooleanField(default=True, verbose_name="Show Uploader Name")
     is_approved = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    rejection_remark = models.TextField(blank=True, null=True)
     is_highlighted = models.BooleanField(default=False)
     
     # Specific departments or groups that can view this book (blank means all logged-in users can view)
@@ -51,6 +59,8 @@ class Article(models.Model):
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='uploaded_articles')
     show_uploader = models.BooleanField(default=True, verbose_name="Show Uploader Name")
     is_approved = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    rejection_remark = models.TextField(blank=True, null=True)
     is_highlighted = models.BooleanField(default=False)
     
     # Specific departments or groups that can view this article (blank means all logged-in users can view)

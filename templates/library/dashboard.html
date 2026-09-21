@@ -43,15 +43,25 @@
                             <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99, 102, 241, 0.1);">{{ book.category_tag }}</span></td>
                             <td>{{ book.created_at|date:"M d, Y, h:i A" }}</td>
                             <td>
-                                {% if book.is_approved %}
+                                {% if book.status == 'approved' or book.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                {% elif book.status == 'rejected' %}
+                                    <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                    {% if book.rejection_remark %}
+                                        <div style="font-size: 0.8rem; color: #f87171; margin-top: 0.35rem; max-width: 280px; word-break: break-word;">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Reason:</strong> {{ book.rejection_remark }}
+                                        </div>
+                                    {% endif %}
                                 {% else %}
                                     <span class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> Pending Approval</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                    {% if book.is_approved %}
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                    <a href="{% url 'user_edit_book' book.pk %}" class="btn btn-secondary btn-sm" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    {% if book.is_approved or book.status == 'approved' %}
                                         <a href="{% url 'book_detail' book.pk %}" class="btn btn-secondary btn-sm">
                                             <i class="fa-solid fa-eye"></i> View
                                         </a>
@@ -59,7 +69,7 @@
                                         <form method="POST" action="{% url 'cancel_upload' 'book' book.pk %}" onsubmit="return confirm('Are you sure you want to cancel and delete the upload request for \'{{ book.title|escapejs }}\'?');">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fa-solid fa-trash-can"></i> Cancel Request
+                                                <i class="fa-solid fa-trash-can"></i> Cancel
                                             </button>
                                         </form>
                                     {% endif %}
@@ -99,15 +109,25 @@
                             <td>{{ article.images.count }} photos</td>
                             <td>{{ article.created_at|date:"M d, Y, h:i A" }}</td>
                             <td>
-                                {% if article.is_approved %}
+                                {% if article.status == 'approved' or article.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
+                                {% elif article.status == 'rejected' %}
+                                    <span class="badge badge-rejected" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                                    {% if article.rejection_remark %}
+                                        <div style="font-size: 0.8rem; color: #f87171; margin-top: 0.35rem; max-width: 280px; word-break: break-word;">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Reason:</strong> {{ article.rejection_remark }}
+                                        </div>
+                                    {% endif %}
                                 {% else %}
                                     <span class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> Pending Approval</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                    {% if article.is_approved %}
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                    <a href="{% url 'user_edit_article' article.pk %}" class="btn btn-secondary btn-sm" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc;">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    {% if article.is_approved or article.status == 'approved' %}
                                         <a href="{% url 'article_detail' article.pk %}" class="btn btn-secondary btn-sm">
                                             <i class="fa-solid fa-eye"></i> View
                                         </a>
@@ -115,7 +135,7 @@
                                         <form method="POST" action="{% url 'cancel_upload' 'article' article.pk %}" onsubmit="return confirm('Are you sure you want to cancel and delete the upload request for \'{{ article.title|escapejs }}\'?');">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fa-solid fa-trash-can"></i> Cancel Request
+                                                <i class="fa-solid fa-trash-can"></i> Cancel
                                             </button>
                                         </form>
                                     {% endif %}

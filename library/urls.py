@@ -16,6 +16,8 @@ urlpatterns = [
     
     # User Upload Status Dashboard
     path('dashboard/', views.user_dashboard_view, name='user_dashboard'),
+    path('dashboard/edit-book/<int:pk>/', views.user_edit_book_view, name='user_edit_book'),
+    path('dashboard/edit-article/<int:pk>/', views.user_edit_article_view, name='user_edit_article'),
     path('cancel/<str:content_type>/<int:pk>/', views.cancel_upload_view, name='cancel_upload'),
     
     # Faculty / Super Admin Dashboards
