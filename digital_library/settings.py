@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!+l4s9mn5nn_2=f7!1ob74p%21i9fg#v6-9c8m&rf_t5vjfw)0'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-!+l4s9mn5nn_2=f7!1ob74p%21i9fg#v6-9c8m&rf_t5vjfw)0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['157.151.152.144', 'localhost', '127.0.0.1', '*']
 
 
 # Application definition
@@ -113,13 +114,19 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
+# ── Sub‑path & Static/Media configuration ────────────────────────────────
+FORCE_SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME', '/digital_library')
 
-STATIC_URL = '/static/'
+if FORCE_SCRIPT_NAME:
+    STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
+    MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
+else:
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
