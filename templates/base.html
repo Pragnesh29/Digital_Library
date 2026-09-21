@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sarvatra GyanKosh{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'images/gyankosh_logo.png' %}">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/gyankosh_logo.png' %}">
+    <link rel="icon" type="image/jpeg" href="{% static 'images/cme_logo.jpeg' %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{% static 'images/cme_logo.jpeg' %}">
     <script>
         (function() {
             var savedTheme = localStorage.getItem('theme') || 'dark';
@@ -20,7 +20,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4.0">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -138,9 +138,71 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    <!-- Rich Modern Footer -->
     <footer>
-        <p>&copy; {% now "Y" %} Sarvatra GyanKosh. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Column 1: Brand & Description -->
+                <div class="footer-col footer-brand-col">
+                    <div class="footer-brand-title">
+                        <img src="/media/image/gyankosh_logo.png" alt="GyanKosh Logo" class="footer-brand-logo" onerror="this.src='{% static 'images/gyankosh_logo.png' %}'">
+                        <span>Sarvatra GyanKosh</span>
+                    </div>
+                    <p class="footer-desc">
+                        Centralized Digital Library Repository & Knowledge Portal. Access books, journals, technical reports, and academic research papers.
+                    </p>
+                    <div class="footer-badge">
+                        <i class="fa-solid fa-shield-halved"></i> College of Military Engineering
+                    </div>
+                </div>
+
+                <!-- Column 2: Quick Links -->
+                <div class="footer-col">
+                    <h4 class="footer-title">Quick Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home' %}"><i class="fa-solid fa-chevron-right"></i> Home</a></li>
+                        <li><a href="{% url 'book_list' %}"><i class="fa-solid fa-chevron-right"></i> Books Library</a></li>
+                        <li><a href="{% url 'article_list' %}"><i class="fa-solid fa-chevron-right"></i> Research Articles</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'user_dashboard' %}"><i class="fa-solid fa-chevron-right"></i> My Upload Status</a></li>
+                            <li><a href="{% url 'feedback' %}"><i class="fa-solid fa-chevron-right"></i> Feedback & Support</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}"><i class="fa-solid fa-chevron-right"></i> User Login</a></li>
+                            <li><a href="{% url 'signup' %}"><i class="fa-solid fa-chevron-right"></i> Register Account</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Column 3: Contact & Support Details with CME Logo -->
+                <div class="footer-col footer-contact-col">
+                    <div class="footer-contact-header">
+                        <img src="/media/image/cme_logo.jpeg" alt="CME Logo" class="footer-cme-logo" onerror="this.src='{% static 'images/cme_logo.jpeg' %}'">
+                        <div>
+                            <h4 class="footer-title" style="margin-bottom: 0.1rem;">Contact & Support</h4>
+                            <span class="footer-sub">College of Military Engineering</span>
+                        </div>
+                    </div>
+                    <ul class="footer-contact-list">
+                        <li>
+                            <i class="fa-solid fa-phone"></i>
+                            <span><strong>Support Line:</strong> +91 98765 43210 / +91 20 2712 3456</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-envelope"></i>
+                            <span><strong>Email Support:</strong> <a href="mailto:support.gyankosh@cme.edu.in">support.gyankosh@cme.edu.in</a></span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span><strong>Address:</strong> CME Dapodi, Pune - 411031, Maharashtra, India</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; {% now "Y" %} Sarvatra GyanKosh. All rights reserved. | College of Military Engineering</p>
+            </div>
+        </div>
     </footer>
 
     <!-- Global Theme Script -->
