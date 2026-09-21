@@ -66,6 +66,18 @@ class ArticleUploadForm(forms.ModelForm):
         required=False,
         label="Show 'Uploaded By' name publicly"
     )
+    restricted_to_departments = forms.ModelMultipleChoiceField(
+        queryset=Department.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Restrict to Specific Departments (Leave empty to make public to all logged-in users)"
+    )
+    restricted_to_groups = forms.ModelMultipleChoiceField(
+        queryset=Group.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label="Restrict to Specific Groups (Leave empty to make public to all logged-in users)"
+    )
     files = MultipleFileField(
         required=False,
         label="Upload Attachments (Photos, PDFs & Word/Text Docs)"
@@ -73,7 +85,7 @@ class ArticleUploadForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ['title', 'description', 'category', 'show_uploader', 'files']
+        fields = ['title', 'description', 'category', 'show_uploader', 'restricted_to_departments', 'restricted_to_groups', 'files']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

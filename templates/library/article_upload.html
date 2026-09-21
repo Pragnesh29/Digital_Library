@@ -50,6 +50,33 @@
             </label>
         </div>
 
+        <!-- Permissions Restriction Panel -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-lock-open" style="color: var(--accent-indigo); margin-right: 0.5rem;"></i> Visibility Restrictions</h3>
+            
+            <div class="form-group">
+                <label style="font-weight: 600; color: var(--text-primary);">{{ form.restricted_to_departments.label }}</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.9rem;">
+                    {% for checkbox in form.restricted_to_departments %}
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-secondary);">
+                            {{ checkbox.tag }} {{ checkbox.choice_label }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label style="font-weight: 600; color: var(--text-primary);">{{ form.restricted_to_groups.label }}</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.9rem;">
+                    {% for checkbox in form.restricted_to_groups %}
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-secondary);">
+                            {{ checkbox.tag }} {{ checkbox.choice_label }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
         <div class="form-group">
             <label for="{{ form.files.id_for_label }}">{{ form.files.label }}</label>
             {{ form.files }}

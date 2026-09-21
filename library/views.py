@@ -192,10 +192,22 @@ def book_upload_view(request):
 
 @login_required
 def article_list_view(request):
-    articles = Article.objects.filter(is_approved=True).order_by('-created_at')
+    user = request.user
+    if user.role in ['faculty', 'superuser'] or user.is_superuser:
+        articles = Article.objects.filter(is_approved=True)
+    else:
+        articles = Article.objects.filter(is_approved=True).filter(
+            Q(restricted_to_departments__isnull=True, restricted_to_groups__isnull=True) |
+            Q(restricted_to_departments=user.department) |
+            Q(restricted_to_groups=user.group)
+        ).distinct()
+        
+    articles = articles.order_by('-created_at')
+    departments = Department.objects.all()
     categories = Category.objects.filter(Q(target_type='article') | Q(target_type='both'))
     context = {
         'articles': articles,
+        'departments': departments,
         'categories': categories,
     }
     return render(request, 'library/article_list.html', context)
@@ -203,6 +215,20 @@ def article_list_view(request):
 @login_required
 def article_detail_view(request, pk):
     article = get_object_or_404(Article, pk=pk)
+    user = request.user
+    
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser or article.uploaded_by == user):
+        has_dept_restrictions = article.restricted_to_departments.exists()
+        has_group_restrictions = article.restricted_to_groups.exists()
+        
+        if has_dept_restrictions or has_group_restrictions:
+            is_dept_allowed = article.restricted_to_departments.filter(pk=user.department.pk).exists() if user.department else False
+            is_group_allowed = article.restricted_to_groups.filter(pk=user.group.pk).exists() if user.group else False
+            
+            if not (is_dept_allowed or is_group_allowed):
+                messages.error(request, "Access Denied: You do not belong to the permitted division/department or group to view this article.")
+                return redirect('article_list')
+                
     context = {
         'article': article,
     }
@@ -217,6 +243,7 @@ def article_upload_view(request):
             article.uploaded_by = request.user
             article.is_approved = False
             article.save()
+            form.save_m2m()
             
             # Handle multiple file uploads (photos, PDFs, Word/Text docs)
             uploaded_files = request.FILES.getlist('files') or request.FILES.getlist('attachments') or request.FILES.getlist('images')

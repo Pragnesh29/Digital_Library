@@ -53,6 +53,10 @@ class Article(models.Model):
     is_approved = models.BooleanField(default=False)
     is_highlighted = models.BooleanField(default=False)
     
+    # Specific departments or groups that can view this article (blank means all logged-in users can view)
+    restricted_to_departments = models.ManyToManyField(Department, blank=True, related_name='restricted_articles')
+    restricted_to_groups = models.ManyToManyField(Group, blank=True, related_name='restricted_articles')
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def get_category_name(self):

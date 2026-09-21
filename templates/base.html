@@ -120,16 +120,18 @@
             
             icons.forEach(function(icon) {
                 if (theme === 'light') {
-                    icon.className = 'fa-solid fa-sun';
-                    icon.style.color = '#f59e0b';
-                } else {
+                    // Current theme is light -> Option to switch to Dark Mode
                     icon.className = 'fa-solid fa-moon';
                     icon.style.color = '#a5b4fc';
+                } else {
+                    // Current theme is dark -> Option to switch to Light Mode
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#f59e0b';
                 }
             });
             
             texts.forEach(function(text) {
-                text.textContent = theme === 'light' ? 'Light Mode' : 'Dark Mode';
+                text.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
             });
         }
 

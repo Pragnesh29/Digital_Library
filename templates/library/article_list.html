@@ -40,7 +40,14 @@
     <div class="catalog-grid" id="articles-grid">
         {% for article in articles %}
             <div class="glass article-card" data-category="{{ article.get_category_name|escapejs }}">
-                <span class="book-category" style="margin-bottom: 0.5rem; display: inline-block;">{{ article.get_category_name }}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span class="book-category">{{ article.get_category_name }}</span>
+                    {% if article.restricted_to_departments.exists or article.restricted_to_groups.exists %}
+                        <span class="badge-restricted" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem;" title="Visible only to specific departments or groups">
+                            <i class="fa-solid fa-lock"></i> Restricted
+                        </span>
+                    {% endif %}
+                </div>
                 <h3 class="article-title">{{ article.title }}</h3>
                 <p class="article-desc">{{ article.description }}</p>
                 
