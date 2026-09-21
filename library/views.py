@@ -383,6 +383,25 @@ def update_feedback_status_view(request, pk):
     return redirect('admin_dashboard')
 
 @login_required
+def delete_feedback_view(request, pk):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    fb = get_object_or_404(Feedback, pk=pk)
+    if request.method == 'POST':
+        subject = fb.subject
+        fb_id = fb.id
+        username = fb.user.username
+        fb.delete()
+        
+        messages.success(request, f"Feedback #{fb_id} ('{subject}') deleted successfully.")
+        log_action(user, "Feedback Deleted", f"Deleted feedback #{fb_id} submitted by '{username}' (Subject: '{subject}')")
+        
+    return redirect('admin_dashboard')
+
+@login_required
 def manage_categories_view(request):
     user = request.user
     if not (user.role in ['faculty', 'superuser'] or user.is_superuser):

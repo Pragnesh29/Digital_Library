@@ -738,24 +738,32 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <form method="POST" action="{% url 'update_feedback_status' fb.pk %}" style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
-                                    {% csrf_token %}
-                                    {% if fb.status != 'resolved' %}
-                                        <button type="submit" name="status" value="resolved" class="btn btn-sm" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                            <i class="fa-solid fa-check"></i> Resolve
+                                <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
+                                    <form method="POST" action="{% url 'update_feedback_status' fb.pk %}" style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                                        {% csrf_token %}
+                                        {% if fb.status != 'resolved' %}
+                                            <button type="submit" name="status" value="resolved" class="btn btn-sm" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Mark Resolved">
+                                                <i class="fa-solid fa-check"></i> Resolve
+                                            </button>
+                                        {% endif %}
+                                        {% if fb.status != 'pending' %}
+                                            <button type="submit" name="status" value="pending" class="btn btn-sm" style="background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Mark Pending">
+                                                <i class="fa-solid fa-clock"></i> Pending
+                                            </button>
+                                        {% endif %}
+                                        {% if fb.status != 'ignored' %}
+                                            <button type="submit" name="status" value="ignored" class="btn btn-sm" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Mark Ignore">
+                                                <i class="fa-solid fa-ban"></i> Ignore
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                    <form method="POST" action="{% url 'delete_feedback' fb.pk %}" onsubmit="return confirm('Are you sure you want to delete feedback #{{ fb.id }}?');" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Delete Feedback">
+                                            <i class="fa-solid fa-trash"></i> Delete
                                         </button>
-                                    {% endif %}
-                                    {% if fb.status != 'pending' %}
-                                        <button type="submit" name="status" value="pending" class="btn btn-sm" style="background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                            <i class="fa-solid fa-clock"></i> Pending
-                                        </button>
-                                    {% endif %}
-                                    {% if fb.status != 'ignored' %}
-                                        <button type="submit" name="status" value="ignored" class="btn btn-sm" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                            <i class="fa-solid fa-ban"></i> Ignore
-                                        </button>
-                                    {% endif %}
-                                </form>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}

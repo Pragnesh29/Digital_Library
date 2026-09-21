@@ -35,4 +35,5 @@ urlpatterns = [
     # Feedback
     path('feedback/', views.feedback_view, name='feedback'),
     path('admin-dashboard/feedback/<int:pk>/update-status/', views.update_feedback_status_view, name='update_feedback_status'),
+    path('admin-dashboard/feedback/<int:pk>/delete/', views.delete_feedback_view, name='delete_feedback'),
 ]
