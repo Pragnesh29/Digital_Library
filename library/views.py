@@ -185,7 +185,8 @@ def book_upload_view(request):
             log_action(request.user, "Book Uploaded", f"Uploaded book '{book.title}' (Pending approval)")
             return redirect('user_dashboard')
         else:
-            messages.error(request, "Failed to upload book. Please review form errors.")
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Book upload failed! Reason: {errors_detail}")
     else:
         form = BookUploadForm()
     return render(request, 'library/book_upload.html', {'form': form})
@@ -261,7 +262,8 @@ def article_upload_view(request):
             log_action(request.user, "Article Uploaded", f"Uploaded article '{article.title}' (Pending approval)")
             return redirect('user_dashboard')
         else:
-            messages.error(request, "Failed to upload article. Please review form errors.")
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Article upload failed! Reason: {errors_detail}")
     else:
         form = ArticleUploadForm()
     return render(request, 'library/article_upload.html', {'form': form})
@@ -353,11 +355,12 @@ def feedback_view(request):
             for img in uploaded_images:
                 FeedbackImage.objects.create(feedback=fb, image=img)
 
-            messages.success(request, "Thank you! Your feedback has been submitted successfully.")
+            messages.success(request, f"Feedback '{fb.subject}' submitted successfully! Our team will review your feedback shortly.")
             log_action(request.user, "Feedback Submitted", f"Submitted feedback #{fb.id}: {fb.subject}")
             return redirect('user_dashboard')
         else:
-            messages.error(request, "Failed to submit feedback. Please check form errors.")
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Feedback submission failed! Reason: {errors_detail}")
     else:
         form = FeedbackForm()
     return render(request, 'library/feedback.html', {'form': form})

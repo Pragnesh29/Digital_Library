@@ -91,15 +91,18 @@
     {% if messages %}
     <div class="messages-container">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {% if message.tags == 'success' %}
-                <i class="fa-solid fa-circle-check" style="margin-right: 0.5rem;"></i>
-            {% elif message.tags == 'error' %}
-                <i class="fa-solid fa-circle-exclamation" style="margin-right: 0.5rem;"></i>
-            {% else %}
-                <i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i>
-            {% endif %}
-            {{ message }}
+        <div class="alert alert-{{ message.tags }}" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                {% if message.tags == 'success' %}
+                    <i class="fa-solid fa-circle-check" style="margin-right: 0.5rem;"></i>
+                {% elif message.tags == 'error' %}
+                    <i class="fa-solid fa-circle-exclamation" style="margin-right: 0.5rem;"></i>
+                {% else %}
+                    <i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i>
+                {% endif %}
+                {{ message }}
+            </div>
+            <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; opacity: 0.7; margin-left: 1rem;" title="Close alert">&times;</button>
         </div>
         {% endfor %}
     </div>
