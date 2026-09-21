@@ -20,7 +20,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3.0">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -28,7 +28,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <a href="{% url 'home' %}" class="nav-brand-container">
-            <img src="/media/image/cme_logo.jpeg" alt="Organization Logo" class="nav-logo-img org-logo" onerror="this.src='{% static 'images/cme_logo.jpeg' %}'">
+            <img src="/media/image/gyankosh_logo.png" alt="Organization Logo" class="nav-logo-img org-logo" onerror="this.src='{% static 'images/gyankosh_logo.png' %}'">
             <div class="brand-divider"></div>
             <span class="nav-brand-title">Sarvatra GyanKosh</span>
         </a>
@@ -54,6 +54,12 @@
                         <i class="fa-solid fa-bars"></i> &nbsp; {{ user.first_name|default:user.username }}
                     </span>
                     <div class="nav-dropdown-menu">
+                        <div class="mobile-nav-items">
+                            <a href="{% url 'home' %}"><i class="fa-solid fa-house"></i> Home</a>
+                            <a href="{% url 'book_list' %}"><i class="fa-solid fa-book"></i> Books</a>
+                            <a href="{% url 'article_list' %}"><i class="fa-regular fa-newspaper"></i> Articles</a>
+                            <div class="divider"></div>
+                        </div>
                         {% if user.role == 'faculty' or user.role == 'superuser' or user.is_superuser %}
                             <a href="{% url 'admin_dashboard' %}">
                                 <i class="fa-solid fa-gauge"></i> Admin Dashboard
@@ -80,11 +86,28 @@
                     </div>
                 </div>
             {% else %}
-                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="padding: 0.4rem 0.65rem;">
-                    <i class="fa-solid fa-moon" id="themeIconGuest"></i>
-                </button>
-                <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Login</a>
-                <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
+                <!-- Guest Mobile Dropdown -->
+                <div class="nav-dropdown mobile-guest-dropdown">
+                    <span class="nav-user-badge nav-dropdown-trigger" style="padding: 0.4rem 0.65rem;">
+                        <i class="fa-solid fa-bars"></i>
+                    </span>
+                    <div class="nav-dropdown-menu">
+                        <a href="{% url 'home' %}"><i class="fa-solid fa-house"></i> Home</a>
+                        <a href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+                        <a href="{% url 'signup' %}"><i class="fa-solid fa-user-plus"></i> Sign Up</a>
+                        <div class="divider"></div>
+                        <button type="button" class="theme-toggle-item" onclick="toggleTheme()">
+                            <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="desktop-guest-auth" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleTheme()" title="Toggle Light/Dark Theme" style="padding: 0.4rem 0.65rem;">
+                        <i class="fa-solid fa-moon" id="themeIconGuest"></i>
+                    </button>
+                    <a href="{% url 'login' %}" class="btn btn-secondary btn-sm">Login</a>
+                    <a href="{% url 'signup' %}" class="btn btn-primary btn-sm">Sign Up</a>
+                </div>
             {% endif %}
         </div>
     </nav>

@@ -924,35 +924,43 @@ table.dashboard-table td {
 /* Faculty Admin Dashboard Tabs */
 .tabs-header {
     display: flex;
-    gap: 1rem;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    align-items: center;
     border-bottom: 1px solid var(--border-glass);
     margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tab-btn {
-    padding: 1rem 1.5rem;
-    background: none;
-    border: none;
+    padding: 0.6rem 1.1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
-    position: relative;
+    white-space: nowrap;
     transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
 }
 
 .tab-btn.active {
-    color: var(--accent-indigo);
+    background: var(--accent-indigo);
+    color: white !important;
+    border-color: var(--accent-indigo);
+    box-shadow: 0 4px 12px var(--accent-glow);
 }
-
-.tab-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
     left: 0;
     width: 100%;
     height: 2px;
@@ -1208,4 +1216,63 @@ html[data-theme="light"] .form-control {
 html[data-theme="light"] .form-control:focus {
     border-color: #4338ca !important;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* ==========================================
+   RESPONSIVE UTILITIES & MEDIA QUERIES (MOBILE / TABLET / DESKTOP)
+   ========================================== */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    align-items: end;
+}
+
+@media (max-width: 900px) {
+    .filter-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .navbar {
+        padding: 0.65rem 1rem !important;
+    }
+    .nav-brand-title {
+        font-size: 1.1rem !important;
+    }
+    .brand-divider {
+        display: none !important;
+    }
+    .org-logo {
+        height: 36px !important;
+        width: 36px !important;
+    }
+    .nav-links {
+        display: none !important;
+    }
+    .desktop-guest-auth {
+        display: none !important;
+    }
+    .mobile-guest-dropdown {
+        display: inline-block !important;
+    }
+    .container {
+        padding: 0 1rem !important;
+        margin: 1rem auto !important;
+    }
+    .catalog-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+    }
+    .catalog-header a.btn, .catalog-header button.btn {
+        width: 100% !important;
+    }
+}
+
+@media (min-width: 901px) {
+    .mobile-guest-dropdown {
+        display: none !important;
+    }
+    .mobile-nav-items {
+        display: none !important;
+    }
 }
