@@ -70,7 +70,7 @@
         <i class="fa-regular fa-newspaper"></i> All Articles ({{ all_articles.count }})
     </button>
     <button class="tab-btn" id="btn-feedback-tab" onclick="openTab(event, 'feedback-tab')">
-        <i class="fa-solid fa-comments"></i> Feedbacks ({% if pending_feedbacks_count %}<span style="background: var(--accent-indigo); color: white; border-radius: 10px; padding: 0.1rem 0.45rem; font-size: 0.75rem;">{{ pending_feedbacks_count }}</span>{% else %}0{% endif %})
+        <i class="fa-solid fa-comments"></i> Feedbacks ({{ all_feedbacks.count }})
     </button>
     {% if user.role == 'superuser' or user.is_superuser %}
         <button class="tab-btn" id="btn-logs-tab" onclick="openTab(event, 'logs-tab')">
