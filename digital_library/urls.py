@@ -19,15 +19,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-user_patterns = [
+main_patterns = [
+    path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('', include('library.urls')),
 ]
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('digital_library/', include(user_patterns)),
-    path('', include(user_patterns)),
+    path('digital_library/', include(main_patterns)),
+    path('', include(main_patterns)),
 ]
 
 if settings.DEBUG:
