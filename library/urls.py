@@ -33,6 +33,8 @@ urlpatterns = [
     path('admin-dashboard/edit-book/<int:book_id>/', views.edit_book_view, name='edit_book'),
     path('admin-dashboard/edit-article/<int:article_id>/', views.edit_article_view, name='edit_article'),
     path('admin-dashboard/manage-categories/', views.manage_categories_view, name='manage_categories'),
+    path('admin-dashboard/manage-departments/', views.manage_departments_view, name='manage_departments'),
+    path('admin-dashboard/manage-groups/', views.manage_groups_view, name='manage_groups'),
     
     # Feedback
     path('feedback/', views.feedback_view, name='feedback'),

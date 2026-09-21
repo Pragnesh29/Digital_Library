@@ -406,10 +406,70 @@ def delete_feedback_view(request, pk):
     return redirect_to_admin_dashboard(request, 'feedback-tab')
 
 @login_required
+def manage_departments_view(request):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied: You do not have permissions to manage departments.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            name = request.POST.get('name', '').strip()
+            if name:
+                dept, created = Department.objects.get_or_create(name=name)
+                if created:
+                    messages.success(request, f"Department '{name}' created successfully!")
+                    log_action(user, "Department Created", f"Created department '{name}'")
+                else:
+                    messages.info(request, f"Department '{name}' already exists.")
+            else:
+                messages.error(request, "Department name cannot be empty.")
+        elif action == 'delete':
+            dept_id = request.POST.get('department_id')
+            dept = get_object_or_404(Department, pk=dept_id)
+            dept_name = dept.name
+            dept.delete()
+            messages.success(request, f"Department '{dept_name}' deleted successfully.")
+            log_action(user, "Department Deleted", f"Deleted department '{dept_name}'")
+            
+    return redirect_to_admin_dashboard(request, 'departments-tab')
+
+@login_required
+def manage_groups_view(request):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied: You do not have permissions to manage groups.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            name = request.POST.get('name', '').strip()
+            if name:
+                grp, created = Group.objects.get_or_create(name=name)
+                if created:
+                    messages.success(request, f"Group '{name}' created successfully!")
+                    log_action(user, "Group Created", f"Created group '{name}'")
+                else:
+                    messages.info(request, f"Group '{name}' already exists.")
+            else:
+                messages.error(request, "Group name cannot be empty.")
+        elif action == 'delete':
+            grp_id = request.POST.get('group_id')
+            grp = get_object_or_404(Group, pk=grp_id)
+            grp_name = grp.name
+            grp.delete()
+            messages.success(request, f"Group '{grp_name}' deleted successfully.")
+            log_action(user, "Group Deleted", f"Deleted group '{grp_name}'")
+            
+    return redirect_to_admin_dashboard(request, 'groups-tab')
+
+@login_required
 def manage_categories_view(request):
     user = request.user
     if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
-        messages.error(request, "Access Denied.")
+        messages.error(request, "Access Denied: You do not have permissions to manage categories.")
         return redirect('home')
         
     if request.method == 'POST':
