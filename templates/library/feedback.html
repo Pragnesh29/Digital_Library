@@ -21,7 +21,7 @@
         {% endif %}
         
         <div class="form-group">
-            <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
+            <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }} <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
             {{ form.subject }}
             {% for error in form.subject.errors %}
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
@@ -29,7 +29,7 @@
         </div>
         
         <div class="form-group">
-            <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+            <label for="{{ form.message.id_for_label }}">{{ form.message.label }} <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
             {{ form.message }}
             {% for error in form.message.errors %}
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>

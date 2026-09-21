@@ -31,7 +31,7 @@
         <!-- Title Field with Checkbox -->
         <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label for="{{ form.title.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Title</label>
+                <label for="{{ form.title.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Title <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
                 <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
                     <input type="checkbox" id="u_chk_art_title" checked onchange="toggleInput('u_chk_art_title', '{{ form.title.id_for_label }}')"> Update Title
                 </label>
@@ -59,7 +59,7 @@
         <!-- Description Field with Checkbox -->
         <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label for="{{ form.description.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Description</label>
+                <label for="{{ form.description.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Description <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
                 <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
                     <input type="checkbox" id="u_chk_art_desc" checked onchange="toggleInput('u_chk_art_desc', '{{ form.description.id_for_label }}')"> Update Description
                 </label>

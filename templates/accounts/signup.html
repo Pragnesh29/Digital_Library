@@ -16,7 +16,7 @@
         
         {% for field in form %}
             <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span>{% endif %}</label>
                 {{ field }}
                 {% if field.help_text %}
                     <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem;">{{ field.help_text }}</span>

@@ -21,7 +21,7 @@
         {% endif %}
         
         <div class="form-group">
-            <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            <label for="{{ form.title.id_for_label }}">{{ form.title.label }} <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
             {{ form.title }}
             {% for error in form.title.errors %}
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
@@ -38,7 +38,7 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                <label for="{{ form.category.id_for_label }}">{{ form.category.label }} <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
                 {{ form.category }}
                 {% for error in form.category.errors %}
                     <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
@@ -55,7 +55,7 @@
         </div>
         
         <div class="form-group">
-            <label for="{{ form.pdf.id_for_label }}">{{ form.pdf.label }}</label>
+            <label for="{{ form.pdf.id_for_label }}">{{ form.pdf.label }} <span style="color: var(--danger, #ef4444); font-weight: bold; margin-left: 0.15rem;">*</span></label>
             {{ form.pdf }}
             {% for error in form.pdf.errors %}
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
