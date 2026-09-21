@@ -17,32 +17,46 @@
 }
 
 [data-theme="light"] {
-    --bg-dark: #f1f5f9;
-    --bg-card: rgba(255, 255, 255, 0.94);
-    --border-glass: rgba(148, 163, 184, 0.35);
+    --bg-dark: #f8fafc;
+    --bg-card: #ffffff;
+    --border-glass: rgba(203, 213, 225, 0.7);
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --accent-indigo: #4338ca;
     --accent-violet: #6d28d9;
-    --accent-glow: rgba(79, 70, 229, 0.2);
-    --navbar-bg: rgba(255, 255, 255, 0.94);
+    --accent-glow: rgba(79, 70, 229, 0.15);
+    --navbar-bg: rgba(255, 255, 255, 0.96);
     --dropdown-bg: rgba(255, 255, 255, 0.98);
 }
 
 [data-theme="light"] body {
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
     background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.06) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.04) 0px, transparent 50%);
     color: var(--text-primary);
 }
 
 [data-theme="light"] .glass {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    background: #ffffff;
+    border-color: rgba(203, 213, 225, 0.7);
 }
 
 [data-theme="light"] .nav-brand-title {
-    background: linear-gradient(135deg, #312e81, #4338ca, #6d28d9);
+    background: linear-gradient(135deg, #1e1b4b, #3730a3, #6d28d9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .hero-content h1 {
+    background: linear-gradient(135deg, #1e1b4b, #3730a3, #6d28d9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .catalog-title h2 {
+    background: linear-gradient(135deg, #0f172a, #334155);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -51,6 +65,61 @@
     background: linear-gradient(135deg, #0f172a, #334155);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .nav-user-badge {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.35);
+    color: #3730a3;
+    font-weight: 700;
+}
+
+[data-theme="light"] .btn-secondary {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: rgba(15, 23, 42, 0.15);
+    color: #0f172a;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background: rgba(15, 23, 42, 0.12);
+    color: #000000;
+}
+
+[data-theme="light"] table.dashboard-table th {
+    background: rgba(15, 23, 42, 0.04);
+    color: #475569;
+}
+
+[data-theme="light"] table.dashboard-table td {
+    color: #0f172a;
+}
+
+[data-theme="light"] .tab-btn {
+    color: #64748b;
+}
+
+[data-theme="light"] .tab-btn:hover {
+    color: #0f172a;
+}
+
+[data-theme="light"] .tab-btn.active {
+    color: #4338ca;
+}
+
+[data-theme="light"] .form-control {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+}
+
+[data-theme="light"] .form-control:focus {
+    background: #ffffff;
+    border-color: #4338ca;
+}
+
+[data-theme="light"] select.form-control option {
+    background: #ffffff;
+    color: #0f172a;
 }
 
 [data-theme="light"] footer {
