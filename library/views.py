@@ -327,6 +327,8 @@ def admin_dashboard_view(request):
     all_books = Book.objects.all().order_by('-created_at')
     all_articles = Article.objects.all().order_by('-created_at')
     all_categories = Category.objects.all().order_by('name')
+    all_departments = Department.objects.all().order_by('name')
+    all_groups = Group.objects.all().order_by('name')
     all_feedbacks = Feedback.objects.all().order_by('-created_at')
     pending_feedbacks_count = Feedback.objects.filter(status='pending').count()
     
@@ -340,6 +342,8 @@ def admin_dashboard_view(request):
         'all_books': all_books,
         'all_articles': all_articles,
         'all_categories': all_categories,
+        'all_departments': all_departments,
+        'all_groups': all_groups,
         'audit_logs': audit_logs,
         'all_feedbacks': all_feedbacks,
         'pending_feedbacks_count': pending_feedbacks_count,
