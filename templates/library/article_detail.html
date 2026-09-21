@@ -79,6 +79,29 @@
         </div>
     {% endif %}
 
+    {% if article.restricted_to_departments.exists or article.restricted_to_groups.exists %}
+        <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-shield-halved" style="color: var(--accent-indigo);"></i> Visibility Permissions</h3>
+            <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+                This document contains restricted information and is hidden from / restricted for:
+                <br>
+                {% if article.restricted_to_departments.exists %}
+                    <strong>Restricted Departments:</strong> 
+                    {% for dept in article.restricted_to_departments.all %}
+                        <span class="nav-user-badge" style="display: inline-block; margin: 0.2rem 0; font-size: 0.75rem; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">{{ dept.name }}</span>
+                    {% endfor %}
+                    <br>
+                {% endif %}
+                {% if article.restricted_to_groups.exists %}
+                    <strong>Restricted Groups:</strong> 
+                    {% for grp in article.restricted_to_groups.all %}
+                        <span class="nav-user-badge" style="display: inline-block; margin: 0.2rem 0; font-size: 0.75rem; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">{{ grp.name }}</span>
+                    {% endfor %}
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
     <div class="detail-desc" style="white-space: pre-line; background: rgba(255,255,255,0.01); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-glass);">
         <h3 style="font-size: 1.2rem; margin-bottom: 0.75rem; color: var(--text-primary);"><i class="fa-solid fa-align-left" style="color: var(--accent-violet);"></i> Article Content</h3>
         {{ article.description }}

@@ -22,6 +22,25 @@ def pdf_contains_text(pdf_file, query):
         pass
     return False
 
+def apply_visibility_filter(qs, user):
+    """
+    Filter queryset based on visibility restrictions.
+    Superuser and Faculty can see all approved items.
+    Regular users are EXCLUDED if their department or group is listed in restricted_to_departments or restricted_to_groups.
+    Unauthenticated users can only see items with NO restrictions.
+    """
+    if not user.is_authenticated:
+        return qs.filter(restricted_to_departments__isnull=True, restricted_to_groups__isnull=True)
+    if getattr(user, 'role', None) in ['faculty', 'superuser'] or getattr(user, 'is_superuser', False):
+        return qs
+    
+    # Regular authenticated users: exclude if user's department or group matches restriction
+    if hasattr(user, 'department') and user.department:
+        qs = qs.exclude(restricted_to_departments=user.department)
+    if hasattr(user, 'group') and user.group:
+        qs = qs.exclude(restricted_to_groups=user.group)
+    return qs.distinct()
+
 def home_view(request):
     query = request.GET.get('q', '').strip()
     is_deep_search = request.GET.get('deep') == 'on' or request.GET.get('deep_search') == 'on'
@@ -34,9 +53,9 @@ def home_view(request):
     if query and request.user.is_authenticated:
         search_performed = True
         
-        # Base filter: approved books & articles
-        approved_books = Book.objects.filter(is_approved=True)
-        approved_articles = Article.objects.filter(is_approved=True)
+        # Base filter: approved books & articles with visibility restrictions applied
+        approved_books = apply_visibility_filter(Book.objects.filter(is_approved=True), request.user)
+        approved_articles = apply_visibility_filter(Article.objects.filter(is_approved=True), request.user)
 
         if not is_deep_search:
             # Standard Title & Category search
@@ -78,9 +97,9 @@ def home_view(request):
                     matched_b_list.append(b)
             matching_books = matched_b_list
 
-    # Fetch highlighted books and articles for the home page carousel
-    highlighted_books = Book.objects.filter(is_approved=True, is_highlighted=True).order_by('-created_at')
-    highlighted_articles = Article.objects.filter(is_approved=True, is_highlighted=True).order_by('-created_at')
+    # Fetch highlighted books and articles for the home page carousel with visibility restrictions applied
+    highlighted_books = apply_visibility_filter(Book.objects.filter(is_approved=True, is_highlighted=True), request.user).order_by('-created_at')
+    highlighted_articles = apply_visibility_filter(Article.objects.filter(is_approved=True, is_highlighted=True), request.user).order_by('-created_at')
     
     # Merge highlighted list for carousel
     carousel_items = []
@@ -120,19 +139,8 @@ def home_view(request):
 def book_list_view(request):
     user = request.user
     
-    # Access Control logic
-    # Faculty and Super Admin see all approved books
-    if user.role in ['faculty', 'superuser'] or user.is_superuser:
-        books = Book.objects.filter(is_approved=True)
-    else:
-        # Regular users see approved books which are either public OR match their department OR match their group
-        books = Book.objects.filter(is_approved=True).filter(
-            Q(restricted_to_departments__isnull=True, restricted_to_groups__isnull=True) |
-            Q(restricted_to_departments=user.department) |
-            Q(restricted_to_groups=user.group)
-        ).distinct()
-        
-    books = books.order_by('-created_at')
+    # Access Control: Filter books so restricted departments/groups are hidden from regular users
+    books = apply_visibility_filter(Book.objects.filter(is_approved=True), user).order_by('-created_at')
     
     # Fetch lists for dropdown filters
     departments = Department.objects.all()
@@ -150,19 +158,14 @@ def book_detail_view(request, pk):
     book = get_object_or_404(Book, pk=pk)
     user = request.user
     
-    # Enforce access control for details
+    # Enforce access control for details: block if user belongs to a restricted department or group
     if not (user.role in ['faculty', 'superuser'] or user.is_superuser or book.uploaded_by == user):
-        # Check if the book has restrictions
-        has_dept_restrictions = book.restricted_to_departments.exists()
-        has_group_restrictions = book.restricted_to_groups.exists()
+        is_dept_restricted = user.department and book.restricted_to_departments.filter(pk=user.department.pk).exists()
+        is_group_restricted = user.group and book.restricted_to_groups.filter(pk=user.group.pk).exists()
         
-        if has_dept_restrictions or has_group_restrictions:
-            is_dept_allowed = book.restricted_to_departments.filter(pk=user.department.pk).exists() if user.department else False
-            is_group_allowed = book.restricted_to_groups.filter(pk=user.group.pk).exists() if user.group else False
-            
-            if not (is_dept_allowed or is_group_allowed):
-                messages.error(request, "Access Denied: You do not belong to the permitted division/department or group to view this book.")
-                return redirect('book_list')
+        if is_dept_restricted or is_group_restricted:
+            messages.error(request, "Access Denied: This book is restricted for your department or group.")
+            return redirect('book_list')
                 
     context = {
         'book': book,
@@ -194,16 +197,8 @@ def book_upload_view(request):
 @login_required
 def article_list_view(request):
     user = request.user
-    if user.role in ['faculty', 'superuser'] or user.is_superuser:
-        articles = Article.objects.filter(is_approved=True)
-    else:
-        articles = Article.objects.filter(is_approved=True).filter(
-            Q(restricted_to_departments__isnull=True, restricted_to_groups__isnull=True) |
-            Q(restricted_to_departments=user.department) |
-            Q(restricted_to_groups=user.group)
-        ).distinct()
+    articles = apply_visibility_filter(Article.objects.filter(is_approved=True), user).order_by('-created_at')
         
-    articles = articles.order_by('-created_at')
     departments = Department.objects.all()
     categories = Category.objects.filter(Q(target_type='article') | Q(target_type='both'))
     context = {
@@ -219,16 +214,12 @@ def article_detail_view(request, pk):
     user = request.user
     
     if not (user.role in ['faculty', 'superuser'] or user.is_superuser or article.uploaded_by == user):
-        has_dept_restrictions = article.restricted_to_departments.exists()
-        has_group_restrictions = article.restricted_to_groups.exists()
+        is_dept_restricted = user.department and article.restricted_to_departments.filter(pk=user.department.pk).exists()
+        is_group_restricted = user.group and article.restricted_to_groups.filter(pk=user.group.pk).exists()
         
-        if has_dept_restrictions or has_group_restrictions:
-            is_dept_allowed = article.restricted_to_departments.filter(pk=user.department.pk).exists() if user.department else False
-            is_group_allowed = article.restricted_to_groups.filter(pk=user.group.pk).exists() if user.group else False
-            
-            if not (is_dept_allowed or is_group_allowed):
-                messages.error(request, "Access Denied: You do not belong to the permitted division/department or group to view this article.")
-                return redirect('article_list')
+        if is_dept_restricted or is_group_restricted:
+            messages.error(request, "Access Denied: This article is restricted for your department or group.")
+            return redirect('article_list')
                 
     context = {
         'article': article,
