@@ -967,6 +967,8 @@
             <p style="color: var(--text-secondary); margin-top: 0.5rem;">When users submit feedback or suggestions, they will appear here.</p>
         </div>
     {% endif %}
+</div>
+
 <!-- Custom Designful Rejection Remarks Modal -->
 <div id="rejectionModal" class="modal-overlay" onclick="if(event.target === this) closeRejectionModal();" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem;">
     <div class="glass modal-content" style="max-width: 520px; width: 100%; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(18, 18, 28, 0.95); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 25px rgba(239, 68, 68, 0.15); padding: 1.75rem; transition: transform 0.2s ease;">
@@ -1015,7 +1017,6 @@
             </button>
         </div>
     </div>
-</div>
 </div>
 {% endblock %}
 
