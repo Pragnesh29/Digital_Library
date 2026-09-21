@@ -7,7 +7,61 @@ from .forms import BookUploadForm, ArticleUploadForm
 from .utils import log_action
 from accounts.models import CustomUser, Department, Group
 
+def pdf_contains_text(pdf_file, query):
+    if not pdf_file:
+        return False
+    try:
+        import pypdf
+        reader = pypdf.PdfReader(pdf_file.path)
+        query_lower = query.lower()
+        for page in reader.pages:
+            text = page.extract_text()
+            if text and query_lower in text.lower():
+                return True
+    except Exception:
+        pass
+    return False
+
 def home_view(request):
+    query = request.GET.get('q', '').strip()
+    is_deep_search = request.GET.get('deep') == 'on' or request.GET.get('deep_search') == 'on'
+
+    search_performed = False
+    matching_books = []
+    matching_articles = []
+
+    if query:
+        search_performed = True
+        
+        # Base filter: approved books & articles
+        approved_books = Book.objects.filter(is_approved=True)
+        approved_articles = Article.objects.filter(is_approved=True)
+
+        if not is_deep_search:
+            # Title & Category search
+            matching_books = list(approved_books.filter(
+                Q(title__icontains=query) | Q(category_tag__icontains=query)
+            ).order_by('-created_at'))
+            matching_articles = list(approved_articles.filter(
+                Q(title__icontains=query)
+            ).order_by('-created_at'))
+        else:
+            # Deep Search: search inside PDF content for books, and description for articles
+            articles_qs = approved_articles.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            ).order_by('-created_at')
+            matching_articles = list(articles_qs)
+
+            # For books: check title, category_tag, AND pdf text
+            candidate_books = list(approved_books.order_by('-created_at'))
+            matched_b_list = []
+            for b in candidate_books:
+                if query.lower() in b.title.lower() or query.lower() in b.category_tag.lower():
+                    matched_b_list.append(b)
+                elif pdf_contains_text(b.pdf, query):
+                    matched_b_list.append(b)
+            matching_books = matched_b_list
+
     # Fetch highlighted books and articles for the home page carousel
     highlighted_books = Book.objects.filter(is_approved=True, is_highlighted=True).order_by('-created_at')
     highlighted_articles = Article.objects.filter(is_approved=True, is_highlighted=True).order_by('-created_at')
@@ -22,10 +76,9 @@ def home_view(request):
             'image': b.cover_image.url if b.cover_image else None,
             'url_name': 'book_detail',
             'pk': b.pk,
-            'desc': f"Category: {b.category_tag} | Uploaded by {b.uploaded_by.first_name or b.uploaded_by.username}"
+            'desc': f"Category: {b.category_tag} | Uploaded by {b.uploaded_by.username}"
         })
     for a in highlighted_articles:
-        # Get first image of the article if it exists
         first_img = a.images.first()
         carousel_items.append({
             'type': 'article',
@@ -39,6 +92,11 @@ def home_view(request):
         
     context = {
         'carousel_items': carousel_items,
+        'query': query,
+        'is_deep_search': is_deep_search,
+        'search_performed': search_performed,
+        'matching_books': matching_books,
+        'matching_articles': matching_articles,
     }
     return render(request, 'library/home.html', context)
 
