@@ -329,8 +329,8 @@ def admin_dashboard_view(request):
     all_categories = Category.objects.all().order_by('name')
     all_departments = Department.objects.all().order_by('name')
     all_groups = Group.objects.all().order_by('name')
-    all_feedbacks = Feedback.objects.all().order_by('-created_at')
-    pending_feedbacks_count = Feedback.objects.filter(status='pending').count()
+    all_feedbacks = Feedback.objects.all().order_by('-created_at') if is_admin else None
+    pending_feedbacks_count = Feedback.objects.filter(status='pending').count() if is_admin else 0
     
     context = {
         'pending_users': pending_users,
@@ -376,8 +376,8 @@ def feedback_view(request):
 @login_required
 def update_feedback_status_view(request, pk):
     user = request.user
-    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
-        messages.error(request, "Access Denied.")
+    if not (user.role == 'superuser' or user.is_superuser):
+        messages.error(request, "Access Denied: Only super admins can manage feedback.")
         return redirect('home')
         
     fb = get_object_or_404(Feedback, pk=pk)
@@ -393,8 +393,8 @@ def update_feedback_status_view(request, pk):
 @login_required
 def delete_feedback_view(request, pk):
     user = request.user
-    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
-        messages.error(request, "Access Denied.")
+    if not (user.role == 'superuser' or user.is_superuser):
+        messages.error(request, "Access Denied: Only super admins can manage feedback.")
         return redirect('home')
         
     fb = get_object_or_404(Feedback, pk=pk)

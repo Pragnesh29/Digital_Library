@@ -69,9 +69,11 @@
     <button class="tab-btn" id="btn-all-articles-tab" onclick="openTab(event, 'all-articles-tab')">
         <i class="fa-regular fa-newspaper"></i> All Articles ({{ all_articles.count }})
     </button>
-    <button class="tab-btn" id="btn-feedback-tab" onclick="openTab(event, 'feedback-tab')">
-        <i class="fa-solid fa-comments"></i> Feedbacks ({{ all_feedbacks.count }})
-    </button>
+    {% if user.role == 'superuser' or user.is_superuser %}
+        <button class="tab-btn" id="btn-feedback-tab" onclick="openTab(event, 'feedback-tab')">
+            <i class="fa-solid fa-comments"></i> Feedbacks ({{ all_feedbacks.count }})
+        </button>
+    {% endif %}
     {% if user.role == 'superuser' or user.is_superuser %}
         <button class="tab-btn" id="btn-logs-tab" onclick="openTab(event, 'logs-tab')">
             <i class="fa-solid fa-clock-rotate-left"></i> Activity Logs ({{ audit_logs.count }})
@@ -934,6 +936,7 @@
 </div>
 {% endif %}
 
+{% if user.role == 'superuser' or user.is_superuser %}
 <!-- Feedback Tab -->
 <div id="feedback-tab" class="tab-content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -1047,6 +1050,7 @@
         </div>
     {% endif %}
 </div>
+{% endif %}
 
 <!-- Custom Designful Rejection Remarks Modal -->
 <div id="rejectionModal" class="modal-overlay" onclick="if(event.target === this) closeRejectionModal();" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem;">
