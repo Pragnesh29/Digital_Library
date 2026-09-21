@@ -303,6 +303,10 @@ def cancel_upload_view(request, content_type, pk):
     return redirect('user_dashboard')
 
 
+def redirect_to_admin_dashboard(request, default_tab='users-tab'):
+    active_tab = request.POST.get('active_tab') or request.GET.get('tab') or default_tab
+    return redirect(f"/SarvatraGyanKosh/admin-dashboard/?tab={active_tab}")
+
 @login_required
 def admin_dashboard_view(request):
     user = request.user
@@ -380,7 +384,7 @@ def update_feedback_status_view(request, pk):
             fb.save()
             messages.success(request, f"Feedback #{fb.id} status updated to '{new_status.title()}'.")
             log_action(user, "Feedback Status Updated", f"Updated feedback #{fb.id} status to '{new_status}'")
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'feedback-tab')
 
 @login_required
 def delete_feedback_view(request, pk):
@@ -399,7 +403,7 @@ def delete_feedback_view(request, pk):
         messages.success(request, f"Feedback #{fb_id} ('{subject}') deleted successfully.")
         log_action(user, "Feedback Deleted", f"Deleted feedback #{fb_id} submitted by '{username}' (Subject: '{subject}')")
         
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'feedback-tab')
 
 @login_required
 def manage_categories_view(request):
@@ -435,7 +439,7 @@ def manage_categories_view(request):
             messages.success(request, f"Category '{cat_name}' deleted successfully.")
             log_action(user, "Category Deleted", f"Deleted category '{cat_name}'")
             
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'categories-tab')
 
 @login_required
 def approve_user_view(request, user_id):
@@ -458,7 +462,7 @@ def approve_user_view(request, user_id):
             messages.warning(request, f"Registration request for '{username}' was rejected.")
             log_action(user, "User Registration Rejected", f"Rejected and deleted user registration request for '{username}'")
             
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'users-tab')
 
 @login_required
 def approve_book_view(request, book_id):
@@ -482,7 +486,7 @@ def approve_book_view(request, book_id):
             messages.warning(request, f"Book '{title}' upload was rejected.")
             log_action(user, "Book Upload Rejected", f"Rejected and deleted pending book '{title}' (Uploaded by: {uploaded_by})")
             
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'books-tab')
 
 @login_required
 def approve_article_view(request, article_id):
@@ -506,7 +510,7 @@ def approve_article_view(request, article_id):
             messages.warning(request, f"Article '{title}' upload was rejected.")
             log_action(user, "Article Upload Rejected", f"Rejected and deleted pending article '{title}' (Uploaded by: {uploaded_by})")
             
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'articles-tab')
 
 @login_required
 def toggle_highlight_view(request, content_type, pk):
@@ -522,7 +526,7 @@ def toggle_highlight_view(request, content_type, pk):
             item = get_object_or_404(Article, pk=pk, is_approved=True)
         else:
             messages.error(request, "Invalid content type.")
-            return redirect('admin_dashboard')
+            return redirect_to_admin_dashboard(request, 'highlights-tab')
             
         item.is_highlighted = not item.is_highlighted
         item.save()
@@ -530,7 +534,7 @@ def toggle_highlight_view(request, content_type, pk):
         messages.success(request, f"'{item.title}' has been {status}.")
         log_action(user, "Content Highlight Toggled", f"Toggled highlight status for {content_type} '{item.title}' to {item.is_highlighted}")
         
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'highlights-tab')
 
 @login_required
 def delete_book_view(request, book_id):
@@ -547,7 +551,7 @@ def delete_book_view(request, book_id):
         messages.success(request, f"Book '{title}' was deleted successfully.")
         log_action(user, "Book Deleted", f"Permanently deleted book '{title}' (Uploaded by: {uploaded_by})")
         
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'all-books-tab')
 
 @login_required
 def delete_article_view(request, article_id):
@@ -564,7 +568,7 @@ def delete_article_view(request, article_id):
         messages.success(request, f"Article '{title}' was deleted successfully.")
         log_action(user, "Article Deleted", f"Permanently deleted article '{title}' (Uploaded by: {uploaded_by})")
         
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'all-articles-tab')
 
 from django.contrib.auth.forms import SetPasswordForm
 
@@ -582,7 +586,7 @@ def reset_user_password_view(request, user_id):
             form.save()
             messages.success(request, f"Password for '{target_user.username}' has been reset successfully.")
             log_action(user, "User Password Reset", f"Reset password for user '{target_user.username}'")
-            return redirect('admin_dashboard')
+            return redirect_to_admin_dashboard(request, 'all-users-tab')
         else:
             messages.error(request, "Failed to reset password. Please review errors.")
     else:
@@ -606,7 +610,7 @@ def delete_user_view(request, user_id):
     if request.method == 'POST':
         if user.pk == user_id:
             messages.error(request, "You cannot delete your own account.")
-            return redirect('admin_dashboard')
+            return redirect_to_admin_dashboard(request, 'all-users-tab')
             
         target_user = get_object_or_404(CustomUser, pk=user_id)
         username = target_user.username
@@ -614,7 +618,7 @@ def delete_user_view(request, user_id):
         messages.success(request, f"User '{username}' has been deleted successfully.")
         log_action(user, "User Deleted", f"Permanently deleted user '{username}'")
         
-    return redirect('admin_dashboard')
+    return redirect_to_admin_dashboard(request, 'all-users-tab')
 
 @login_required
 def edit_book_view(request, book_id):
@@ -630,7 +634,7 @@ def edit_book_view(request, book_id):
             form.save()
             messages.success(request, f"Book '{book.title}' updated successfully.")
             log_action(user, "Book Edited", f"Updated book '{book.title}' (Uploaded by: {book.uploaded_by.username})")
-            return redirect('admin_dashboard')
+            return redirect_to_admin_dashboard(request, 'all-books-tab')
         else:
             messages.error(request, "Failed to update book. Please review form errors.")
     else:
@@ -657,7 +661,7 @@ def edit_article_view(request, article_id):
                 
             messages.success(request, f"Article '{article.title}' updated successfully.")
             log_action(user, "Article Edited", f"Updated article '{article.title}' (Uploaded by: {article.uploaded_by.username})")
-            return redirect('admin_dashboard')
+            return redirect_to_admin_dashboard(request, 'all-articles-tab')
         else:
             messages.error(request, "Failed to update article. Please review form errors.")
     else:

@@ -825,8 +825,30 @@
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].classList.remove("active");
         }
-        document.getElementById(tabId).classList.add("active");
-        evt.currentTarget.classList.add("active");
+
+        var targetContent = document.getElementById(tabId);
+        if (targetContent) {
+            targetContent.classList.add("active");
+        }
+
+        var targetBtn = (evt && evt.currentTarget) ? evt.currentTarget : document.getElementById('btn-' + tabId);
+        if (targetBtn) {
+            targetBtn.classList.add("active");
+        }
+
+        // Save active tab state
+        localStorage.setItem('admin_active_tab', tabId);
+
+        // Synchronize hidden active_tab inputs in all forms
+        document.querySelectorAll('input[name="active_tab"]').forEach(input => {
+            input.value = tabId;
+        });
+
+        // Update URL query string without reloading page
+        if (window.history && window.history.replaceState) {
+            const newUrl = window.location.pathname + '?tab=' + tabId;
+            window.history.replaceState(null, '', newUrl);
+        }
     }
 
     // Instant table-row text filtering function
@@ -899,6 +921,28 @@
 
     // Initial setup on DOM Content Loaded
     document.addEventListener("DOMContentLoaded", function() {
+        // Read active tab from URL query param or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        const savedTab = localStorage.getItem('admin_active_tab');
+        const activeTab = tabParam || savedTab;
+
+        if (activeTab && document.getElementById(activeTab)) {
+            openTab(null, activeTab);
+        }
+
+        // Add hidden active_tab field to all POST forms on the dashboard
+        const activeTabVal = activeTab || 'users-tab';
+        document.querySelectorAll('form').forEach(form => {
+            if (!form.querySelector('input[name="active_tab"]')) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'active_tab';
+                hiddenInput.value = activeTabVal;
+                form.appendChild(hiddenInput);
+            }
+        });
+
         setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row');
         setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row');
         setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row');
