@@ -535,29 +535,37 @@
         
         <!-- Books Highlight List -->
         <div>
-            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-book"></i> Approved Books</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="font-size: 1.25rem; margin: 0;"><i class="fa-solid fa-book" style="color: var(--accent-indigo);"></i> Approved Books</h3>
+            </div>
+            
+            <!-- Book Title Search Input -->
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="search-hl-book-input" class="form-control" placeholder="Search approved books by title..." style="font-size: 0.85rem; padding: 0.5rem 0.85rem;">
+            </div>
+
             {% if approved_books %}
                 <div class="glass table-container" style="padding: 1rem;">
                     <table class="dashboard-table" style="font-size: 0.85rem;">
                         <thead>
                             <tr>
                                 <th>Title</th>
-                                <th>Highlight</th>
+                                <th style="text-align: right;">Highlight</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for book in approved_books %}
-                                <tr>
-                                    <td>{{ book.title }}</td>
-                                    <td>
+                                <tr class="hl-book-row">
+                                    <td><strong>{{ book.title }}</strong></td>
+                                    <td style="text-align: right;">
                                         <form method="POST" action="{% url 'toggle_highlight' 'book' book.pk %}" style="display: inline-block;">
                                             {% csrf_token %}
                                             {% if book.is_highlighted %}
-                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.65rem; border-radius: 6px;">
                                                     <i class="fa-solid fa-star"></i> Featured
                                                 </button>
                                             {% else %}
-                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; border-radius: 6px;">
                                                     <i class="fa-regular fa-star"></i> Highlight
                                                 </button>
                                             {% endif %}
@@ -565,6 +573,12 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+                            <tr id="no-hl-books-row" style="display: none;">
+                                <td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                                    <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; opacity: 0.5; margin-bottom: 0.5rem; display: block;"></i>
+                                    No matching approved books found.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -575,29 +589,37 @@
         
         <!-- Articles Highlight List -->
         <div>
-            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-regular fa-newspaper"></i> Approved Articles</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="font-size: 1.25rem; margin: 0;"><i class="fa-regular fa-newspaper" style="color: var(--accent-indigo);"></i> Approved Articles</h3>
+            </div>
+
+            <!-- Article Title Search Input -->
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="search-hl-article-input" class="form-control" placeholder="Search approved articles by title..." style="font-size: 0.85rem; padding: 0.5rem 0.85rem;">
+            </div>
+
             {% if approved_articles %}
                 <div class="glass table-container" style="padding: 1rem;">
                     <table class="dashboard-table" style="font-size: 0.85rem;">
                         <thead>
                             <tr>
                                 <th>Title</th>
-                                <th>Highlight</th>
+                                <th style="text-align: right;">Highlight</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for article in approved_articles %}
-                                <tr>
-                                    <td>{{ article.title }}</td>
-                                    <td>
+                                <tr class="hl-article-row">
+                                    <td><strong>{{ article.title }}</strong></td>
+                                    <td style="text-align: right;">
                                         <form method="POST" action="{% url 'toggle_highlight' 'article' article.pk %}" style="display: inline-block;">
                                             {% csrf_token %}
                                             {% if article.is_highlighted %}
-                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
+                                                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--accent-violet); font-size: 0.75rem; padding: 0.3rem 0.65rem; border-radius: 6px;">
                                                     <i class="fa-solid fa-star"></i> Featured
                                                 </button>
                                             {% else %}
-                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 4px;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; border-radius: 6px;">
                                                     <i class="fa-regular fa-star"></i> Highlight
                                                 </button>
                                             {% endif %}
@@ -605,6 +627,12 @@
                                     </td>
                                 </tr>
                             {% endfor %}
+                            <tr id="no-hl-articles-row" style="display: none;">
+                                <td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                                    <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; opacity: 0.5; margin-bottom: 0.5rem; display: block;"></i>
+                                    No matching approved articles found.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1285,6 +1313,8 @@
         setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row');
         setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row');
         setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row');
+        setupInstantTableFilter('search-hl-book-input', 'hl-book-row', 'no-hl-books-row');
+        setupInstantTableFilter('search-hl-article-input', 'hl-article-row', 'no-hl-articles-row');
         
         // Log tab filters
         const searchLogInput = document.getElementById('search-log-input');
