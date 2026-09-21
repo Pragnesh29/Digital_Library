@@ -553,32 +553,58 @@ select.form-control option {
     margin-bottom: 0.75rem;
 }
 
-.carousel-title {
+.carousel-title,
+.carousel-content h2,
+.carousel-slide h2,
+html[data-theme="light"] .carousel-title,
+html[data-theme="light"] .carousel-content h2,
+html[data-theme="light"] .carousel-slide h2 {
     font-size: 2rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9) !important;
 }
 
-.carousel-desc {
-    color: rgba(255, 255, 255, 0.8);
+.carousel-desc,
+.carousel-content p,
+.carousel-slide p,
+html[data-theme="light"] .carousel-desc,
+html[data-theme="light"] .carousel-content p,
+html[data-theme="light"] .carousel-slide p {
+    color: rgba(255, 255, 255, 0.95) !important;
     font-size: 1rem;
     margin-bottom: 1rem;
     line-height: 1.4;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85) !important;
 }
 
-.carousel-control {
+.carousel-tag,
+html[data-theme="light"] .carousel-tag {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    background: var(--accent-indigo) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+}
+
+.carousel-control,
+html[data-theme="light"] .carousel-control {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     width: 44px;
     height: 44px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border-glass);
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-radius: 50%;
-    color: white;
+    color: #ffffff !important;
     font-size: 1.25rem;
     display: flex;
     align-items: center;
@@ -589,8 +615,10 @@ select.form-control option {
     backdrop-filter: blur(4px);
 }
 
-.carousel-control:hover {
-    background: var(--accent-indigo);
+.carousel-control:hover,
+html[data-theme="light"] .carousel-control:hover {
+    background: var(--accent-indigo) !important;
+    color: #ffffff !important;
     box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
 }
 
