@@ -171,14 +171,20 @@
                                             <i class="fa-solid fa-check"></i> Approve
                                         </button>
                                     </form>
-                                    <form method="POST" action="{% url 'approve_book' book.pk %}" onsubmit="return promptRejectionReason(this, '{{ book.title|escapejs }}');">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="reject">
-                                        <input type="hidden" name="rejection_remark" value="">
-                                        <button type="submit" class="btn btn-warning btn-sm" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: none;">
-                                            <i class="fa-solid fa-xmark"></i> Reject
+                                    {% if book.status == 'rejected' %}
+                                        <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.65; cursor: not-allowed; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                            <i class="fa-solid fa-xmark"></i> Rejected
                                         </button>
-                                    </form>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'approve_book' book.pk %}" onsubmit="return promptRejectionReason(this, '{{ book.title|escapejs }}');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="reject">
+                                            <input type="hidden" name="rejection_remark" value="">
+                                            <button type="submit" class="btn btn-warning btn-sm" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: none;">
+                                                <i class="fa-solid fa-xmark"></i> Reject
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                     <form method="POST" action="{% url 'delete_book' book.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete the book \'{{ book.title|escapejs }}\'? This action will delete the PDF and cover page.');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
@@ -237,14 +243,20 @@
                                             <i class="fa-solid fa-check"></i> Approve
                                         </button>
                                     </form>
-                                    <form method="POST" action="{% url 'approve_article' article.pk %}" onsubmit="return promptRejectionReason(this, '{{ article.title|escapejs }}');">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="reject">
-                                        <input type="hidden" name="rejection_remark" value="">
-                                        <button type="submit" class="btn btn-warning btn-sm" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: none;">
-                                            <i class="fa-solid fa-xmark"></i> Reject
+                                    {% if article.status == 'rejected' %}
+                                        <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.65; cursor: not-allowed; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                            <i class="fa-solid fa-xmark"></i> Rejected
                                         </button>
-                                    </form>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'approve_article' article.pk %}" onsubmit="return promptRejectionReason(this, '{{ article.title|escapejs }}');">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="reject">
+                                            <input type="hidden" name="rejection_remark" value="">
+                                            <button type="submit" class="btn btn-warning btn-sm" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: none;">
+                                                <i class="fa-solid fa-xmark"></i> Reject
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                     <form method="POST" action="{% url 'delete_article' article.pk %}" onsubmit="return confirm('Are you sure you want to permanently delete the article \'{{ article.title|escapejs }}\'?');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">

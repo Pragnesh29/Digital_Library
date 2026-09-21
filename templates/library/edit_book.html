@@ -9,7 +9,7 @@
 
 <div class="glass form-container" style="max-width: 750px;">
     <h2 class="form-title">Edit Book</h2>
-    <p class="form-subtitle">Modify book title, category tag, upload new PDF/cover, and update department/group visibility restrictions.</p>
+    <p class="form-subtitle">Select checkboxes for fields you wish to modify. Unchecked file fields will preserve old uploaded files automatically.</p>
     
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
@@ -20,8 +20,14 @@
             {% endfor %}
         {% endif %}
         
-        <div class="form-group">
-            <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        <!-- Title Field with Checkbox -->
+        <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label for="{{ form.title.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Title</label>
+                <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                    <input type="checkbox" id="chk_title" checked onchange="toggleInput('chk_title', '{{ form.title.id_for_label }}')"> Update Title
+                </label>
+            </div>
             {{ form.title }}
             {% for error in form.title.errors %}
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
@@ -29,19 +35,33 @@
         </div>
         
         <div class="form-row">
-            <div class="form-group">
-                <label for="{{ form.category_tag.id_for_label }}">{{ form.category_tag.label }}</label>
-                {{ form.category_tag }}
-                {% for error in form.category_tag.errors %}
+            <!-- Category Field with Checkbox -->
+            <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label for="{{ form.category.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Category</label>
+                    <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                        <input type="checkbox" id="chk_category" checked onchange="toggleInput('chk_category', '{{ form.category.id_for_label }}')"> Update Category
+                    </label>
+                </div>
+                {{ form.category }}
+                {% for error in form.category.errors %}
                     <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
                 {% endfor %}
             </div>
             
-            <div class="form-group">
-                <label for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
+            <!-- Cover Image Field with Checkbox -->
+            <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label for="{{ form.cover_image.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Cover Image</label>
+                    <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                        <input type="checkbox" id="chk_cover" onchange="toggleInput('chk_cover', '{{ form.cover_image.id_for_label }}')"> Change Cover Image
+                    </label>
+                </div>
                 {{ form.cover_image }}
                 {% if book.cover_image %}
-                    <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem;">Current cover: <a href="{{ book.cover_image.url }}" target="_blank" style="color: var(--accent-indigo);">View cover</a></span>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.35rem;">Current cover: <a href="{{ book.cover_image.url }}" target="_blank" style="color: var(--accent-indigo);">View Cover Page</a></span>
+                {% else %}
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.35rem;">No cover page uploaded</span>
                 {% endif %}
                 {% for error in form.cover_image.errors %}
                     <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
@@ -49,11 +69,17 @@
             </div>
         </div>
         
-        <div class="form-group">
-            <label for="{{ form.pdf.id_for_label }}">{{ form.pdf.label }}</label>
+        <!-- PDF File Field with Checkbox -->
+        <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass); margin-top: 1.25rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label for="{{ form.pdf.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">PDF File</label>
+                <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                    <input type="checkbox" id="chk_pdf" onchange="toggleInput('chk_pdf', '{{ form.pdf.id_for_label }}')"> Replace PDF File
+                </label>
+            </div>
             {{ form.pdf }}
             {% if book.pdf %}
-                <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem;">Current PDF: <a href="{{ book.pdf.url }}" target="_blank" style="color: var(--accent-indigo);">Open PDF</a></span>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.35rem;">Current PDF: <a href="{{ book.pdf.url }}" target="_blank" style="color: var(--accent-indigo);">Open Current PDF</a></span>
             {% endif %}
             {% for error in form.pdf.errors %}
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
@@ -92,4 +118,29 @@
         </button>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleInput(chkId, inputId) {
+        var chk = document.getElementById(chkId);
+        var input = document.getElementById(inputId);
+        if (chk && input) {
+            if (chk.checked) {
+                input.removeAttribute('disabled');
+                input.style.opacity = '1';
+                input.style.pointerEvents = 'auto';
+            } else {
+                input.setAttribute('disabled', 'disabled');
+                input.style.opacity = '0.4';
+                input.style.pointerEvents = 'none';
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInput('chk_cover', '{{ form.cover_image.id_for_label }}');
+        toggleInput('chk_pdf', '{{ form.pdf.id_for_label }}');
+    });
+</script>
 {% endblock %}

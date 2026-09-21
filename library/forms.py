@@ -50,9 +50,14 @@ class BookUploadForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = Category.objects.filter(Q(target_type='book') | Q(target_type='both'))
         for name in ['title', 'pdf', 'cover_image', 'category']:
-            self.fields[name].widget.attrs['class'] = 'form-control'
-            if name != 'category':
-                self.fields[name].widget.attrs['placeholder'] = f'Enter {self.fields[name].label}'
+            if name in self.fields:
+                self.fields[name].widget.attrs['class'] = 'form-control'
+                if name != 'category':
+                    self.fields[name].widget.attrs['placeholder'] = f'Enter {self.fields[name].label}'
+        if self.instance and self.instance.pk:
+            self.fields['pdf'].required = False
+            self.fields['cover_image'].required = False
+            self.fields['category'].required = False
 
 class ArticleUploadForm(forms.ModelForm):
     category = forms.ModelChoiceField(
@@ -101,6 +106,10 @@ class ArticleUploadForm(forms.ModelForm):
 
         if 'files' in self.fields:
             self.fields['files'].widget.attrs['accept'] = 'image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.csv,.xls,.xlsx,.ppt,.pptx'
+
+        if self.instance and self.instance.pk:
+            self.fields['category'].required = False
+            self.fields['files'].required = False
 
 class FeedbackForm(forms.ModelForm):
     images = MultipleFileField(

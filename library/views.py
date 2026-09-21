@@ -698,12 +698,17 @@ def edit_book_view(request, book_id):
     if request.method == 'POST':
         form = BookUploadForm(request.POST, request.FILES, instance=book)
         if form.is_valid():
-            form.save()
+            updated_book = form.save(commit=False)
+            if updated_book.category:
+                updated_book.category_tag = updated_book.category.name
+            updated_book.save()
+            form.save_m2m()
             messages.success(request, f"Book '{book.title}' updated successfully.")
             log_action(user, "Book Edited", f"Updated book '{book.title}' (Uploaded by: {book.uploaded_by.username})")
             return redirect_to_admin_dashboard(request, 'all-books-tab')
         else:
-            messages.error(request, "Failed to update book. Please review form errors.")
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Failed to update book! Reason: {errors_detail}")
     else:
         form = BookUploadForm(instance=book)
         
@@ -722,7 +727,7 @@ def edit_article_view(request, article_id):
         if form.is_valid():
             form.save()
             
-            images = request.FILES.getlist('images')
+            images = request.FILES.getlist('images') or request.FILES.getlist('files')
             for img in images:
                 ArticleImage.objects.create(article=article, image=img)
                 
@@ -730,7 +735,8 @@ def edit_article_view(request, article_id):
             log_action(user, "Article Edited", f"Updated article '{article.title}' (Uploaded by: {article.uploaded_by.username})")
             return redirect_to_admin_dashboard(request, 'all-articles-tab')
         else:
-            messages.error(request, "Failed to update article. Please review form errors.")
+            errors_detail = " | ".join([f"{field.replace('_', ' ').capitalize()}: {', '.join(errs)}" for field, errs in form.errors.items()])
+            messages.error(request, f"Failed to update article! Reason: {errors_detail}")
     else:
         form = ArticleUploadForm(instance=article)
         
