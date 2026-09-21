@@ -20,7 +20,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=9.0">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -240,9 +240,93 @@
             applyTheme(newTheme);
         }
 
+        // Global Interactive Table Column Sorter (A-Z / Z-A, Dates, Status)
+        function initTableSorting() {
+            document.querySelectorAll('table.dashboard-table').forEach(function(table) {
+                var headers = table.querySelectorAll('thead th');
+                var tbody = table.querySelector('tbody');
+                if (!tbody || headers.length === 0) return;
+
+                headers.forEach(function(header, colIndex) {
+                    var headerText = header.textContent.trim().toLowerCase();
+                    if (headerText.includes('action') || headerText.includes('file info')) {
+                        return;
+                    }
+
+                    header.style.cursor = 'pointer';
+                    header.style.userSelect = 'none';
+                    header.title = 'Click to sort column A-Z / Z-A';
+
+                    if (!header.querySelector('.sort-icon')) {
+                        var iconSpan = document.createElement('span');
+                        iconSpan.className = 'sort-icon';
+                        iconSpan.style.marginLeft = '0.35rem';
+                        iconSpan.style.display = 'inline-block';
+                        iconSpan.style.opacity = '0.35';
+                        iconSpan.style.transition = 'all 0.2s ease';
+                        iconSpan.innerHTML = '<i class="fa-solid fa-sort" style="font-size: 0.75rem;"></i>';
+                        header.appendChild(iconSpan);
+                    }
+
+                    header.addEventListener('click', function() {
+                        var currentDir = header.getAttribute('data-sort-dir') || 'none';
+                        var newDir = (currentDir === 'asc') ? 'desc' : 'asc';
+
+                        headers.forEach(function(h) {
+                            h.setAttribute('data-sort-dir', 'none');
+                            var icon = h.querySelector('.sort-icon');
+                            if (icon) {
+                                icon.style.opacity = '0.35';
+                                icon.innerHTML = '<i class="fa-solid fa-sort" style="font-size: 0.75rem;"></i>';
+                            }
+                        });
+
+                        header.setAttribute('data-sort-dir', newDir);
+                        var activeIcon = header.querySelector('.sort-icon');
+                        if (activeIcon) {
+                            activeIcon.style.opacity = '1';
+                            if (newDir === 'asc') {
+                                activeIcon.innerHTML = '<i class="fa-solid fa-arrow-down-a-z" style="color: var(--accent-indigo); font-size: 0.85rem;"></i>';
+                            } else {
+                                activeIcon.innerHTML = '<i class="fa-solid fa-arrow-down-z-a" style="color: var(--accent-indigo); font-size: 0.85rem;"></i>';
+                            }
+                        }
+
+                        var rows = Array.from(tbody.querySelectorAll('tr')).filter(function(row) {
+                            return !row.id || !row.id.startsWith('no-');
+                        });
+
+                        rows.sort(function(rowA, rowB) {
+                            var cellA = rowA.children[colIndex];
+                            var cellB = rowB.children[colIndex];
+                            if (!cellA || !cellB) return 0;
+
+                            var textA = cellA.textContent.trim().toLowerCase();
+                            var textB = cellB.textContent.trim().toLowerCase();
+
+                            var timeA = Date.parse(textA);
+                            var timeB = Date.parse(textB);
+                            if (!isNaN(timeA) && !isNaN(timeB)) {
+                                return newDir === 'asc' ? timeA - timeB : timeB - timeA;
+                            }
+
+                            return newDir === 'asc'
+                                ? textA.localeCompare(textB, undefined, { numeric: true, sensitivity: 'base' })
+                                : textB.localeCompare(textA, undefined, { numeric: true, sensitivity: 'base' });
+                        });
+
+                        rows.forEach(function(row) {
+                            tbody.appendChild(row);
+                        });
+                    });
+                });
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             var currentTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme') || 'dark';
             updateThemeUI(currentTheme);
+            initTableSorting();
         });
     </script>
 

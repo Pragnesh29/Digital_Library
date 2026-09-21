@@ -90,6 +90,14 @@
     color: #475569;
 }
 
+table.dashboard-table th {
+    transition: var(--transition);
+}
+
+table.dashboard-table th:hover {
+    color: var(--accent-indigo);
+}
+
 [data-theme="light"] table.dashboard-table td {
     color: #0f172a;
 }
