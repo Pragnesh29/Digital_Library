@@ -29,16 +29,6 @@
         </select>
     </div>
     
-    <div class="form-group" style="margin-bottom: 0;">
-        <label for="dept-filter" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Department Restriction</label>
-        <select id="dept-filter" class="form-control">
-            <option value="">-- All Departments --</option>
-            {% for dept in departments %}
-                <option value="{{ dept.pk }}">{{ dept.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    
     <div>
         <button type="button" class="btn btn-secondary" onclick="resetFilters();" title="Reset all filters" style="padding: 0.75rem 1.25rem; width: 100%;">
             <i class="fa-solid fa-rotate-left"></i> Reset
@@ -49,7 +39,7 @@
 {% if books %}
     <div class="catalog-grid" id="books-grid">
         {% for book in books %}
-            <div class="glass book-card" data-category="{{ book.get_category_name|escapejs }}" data-departments="{% for dept in book.restricted_to_departments.all %}{{ dept.pk }},{% endfor %}">
+            <div class="glass book-card" data-category="{{ book.get_category_name|escapejs }}">
                 <div class="book-cover-container">
                     {% if book.cover_image %}
                         <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover">
@@ -116,7 +106,6 @@
     function filterBooks() {
         const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
         const categoryVal = document.getElementById('category-filter').value;
-        const deptVal = document.getElementById('dept-filter').value;
         
         const cards = document.querySelectorAll('.book-card');
         let visibleCount = 0;
@@ -124,13 +113,11 @@
         cards.forEach(card => {
             const title = card.querySelector('.book-title').textContent.toLowerCase();
             const category = card.getAttribute('data-category');
-            const depts = card.getAttribute('data-departments').split(',');
             
             let matchesSearch = !searchVal || title.includes(searchVal);
             let matchesCategory = !categoryVal || category === categoryVal;
-            let matchesDept = !deptVal || depts.includes(deptVal);
             
-            if (matchesSearch && matchesCategory && matchesDept) {
+            if (matchesSearch && matchesCategory) {
                 card.dataset.filteredOut = 'false';
                 visibleCount++;
             } else {
@@ -149,7 +136,6 @@
     function resetFilters() {
         document.getElementById('search-input').value = '';
         document.getElementById('category-filter').value = '';
-        document.getElementById('dept-filter').value = '';
         filterBooks();
     }
 
@@ -157,7 +143,6 @@
         booksPag = createPaginator({ itemSelector: '.book-card', paginationContainerId: 'books-pagination', pageSize: 30 });
         document.getElementById('search-input').addEventListener('input', filterBooks);
         document.getElementById('category-filter').addEventListener('change', filterBooks);
-        document.getElementById('dept-filter').addEventListener('change', filterBooks);
     });
 </script>
 {% endblock %}
