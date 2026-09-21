@@ -9,7 +9,8 @@
         <h1>Welcome to Sarvatra GyanKosh</h1>
         <p>Your portal to academic excellence. Access research papers, books, and articles seamlessly. Search titles or enable Deep Search to inspect PDF contents and full descriptions.</p>
         
-        <!-- Home Search Bar with Deep Search Toggle -->
+        <!-- Home Search Bar with Deep Search Toggle (Visible only to Logged-in Users) -->
+        {% if user.is_authenticated %}
         <form method="GET" action="{% url 'home' %}#search-results" class="home-search-form" style="margin-top: 1.5rem; max-width: 650px;">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; background: rgba(255, 255, 255, 0.06); padding: 0.5rem 0.75rem; border-radius: 12px; border: 1px solid var(--border-glass); backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
                 <div style="flex: 1; min-width: 220px; display: flex; align-items: center; padding-left: 0.5rem; gap: 0.6rem;">
@@ -19,7 +20,7 @@
                 
                 <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; padding: 0 0.6rem; border-left: 1px solid rgba(255,255,255,0.12); user-select: none;" title="Tick to search inside PDF text and full article descriptions">
                     <input type="checkbox" name="deep" value="on" {% if is_deep_search %}checked{% endif %} style="width: 15px; height: 15px; accent-color: var(--accent-indigo); cursor: pointer;">
-                    <span><i class="fa-solid fa-file-pdf" style="color: #f87171;"></i> Deep Search</span>
+                    <span><i class="fa-solid fa-magnifying-glass" style="color: var(--accent-indigo);"></i> Deep Search</span>
                 </label>
                 
                 <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.6rem 1.25rem; border-radius: 8px; font-weight: 600;">
@@ -30,6 +31,7 @@
                 💡 <strong>Normal Search</strong> matches titles. <strong>Deep Search</strong> searches inside PDF contents & full descriptions.
             </span>
         </form>
+        {% endif %}
 
         <div class="hero-actions" style="margin-top: 1.5rem;">
             {% if user.is_authenticated %}
@@ -88,7 +90,7 @@
     </div>
 </div>
 
-{% if search_performed %}
+{% if search_performed and user.is_authenticated %}
 <div class="glass" style="padding: 2.5rem; margin-top: 3rem;" id="search-results">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 1rem;">
         <div>

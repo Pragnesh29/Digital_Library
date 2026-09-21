@@ -30,7 +30,8 @@ def home_view(request):
     matching_books = []
     matching_articles = []
 
-    if query:
+    # Search is only accessible for authenticated users
+    if query and request.user.is_authenticated:
         search_performed = True
         
         # Base filter: approved books & articles
@@ -38,7 +39,7 @@ def home_view(request):
         approved_articles = Article.objects.filter(is_approved=True)
 
         if not is_deep_search:
-            # Title & Category search
+            # Standard Title & Category search
             matching_books = list(approved_books.filter(
                 Q(title__icontains=query) | Q(category_tag__icontains=query)
             ).order_by('-created_at'))
@@ -46,17 +47,22 @@ def home_view(request):
                 Q(title__icontains=query)
             ).order_by('-created_at'))
         else:
-            # Deep Search: search inside PDF content for books, and description for articles
+            # Deep Search: search inside PDF content for books, and full description/keywords for articles
             articles_qs = approved_articles.filter(
-                Q(title__icontains=query) | Q(description__icontains=query)
+                Q(title__icontains=query) |
+                Q(description__icontains=query) |
+                Q(uploaded_by__username__icontains=query) |
+                Q(uploaded_by__first_name__icontains=query)
             ).order_by('-created_at')
             matching_articles = list(articles_qs)
 
-            # For books: check title, category_tag, AND pdf text
+            # For books: check title, category_tag, uploader, AND pdf text content
             candidate_books = list(approved_books.order_by('-created_at'))
             matched_b_list = []
             for b in candidate_books:
-                if query.lower() in b.title.lower() or query.lower() in b.category_tag.lower():
+                if (query.lower() in b.title.lower() or 
+                    query.lower() in b.category_tag.lower() or 
+                    query.lower() in b.uploaded_by.username.lower()):
                     matched_b_list.append(b)
                 elif pdf_contains_text(b.pdf, query):
                     matched_b_list.append(b)
