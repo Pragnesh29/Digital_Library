@@ -21,13 +21,18 @@
             <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ article.uploaded_by.username }}</strong> <small style="color: var(--text-secondary);">(Hidden Publicly)</small></span>
         {% endif %}
         <span><i class="fa-solid fa-calendar-days" style="color: var(--accent-violet); margin-right: 0.25rem;"></i> Added on: <strong>{{ article.created_at|date:"M d, Y" }}</strong></span>
-        <span><i class="fa-solid fa-images" style="color: var(--success); margin-right: 0.25rem;"></i> Total Photos: <strong>{{ article.images.count }}</strong></span>
+        {% if article.images.exists %}
+            <span><i class="fa-solid fa-images" style="color: var(--success); margin-right: 0.25rem;"></i> Total Photos: <strong>{{ article.images.count }}</strong></span>
+        {% endif %}
+        {% if article.attachments.exists %}
+            <span><i class="fa-solid fa-paperclip" style="color: #f59e0b; margin-right: 0.25rem;"></i> Attachments: <strong>{{ article.attachments.count }}</strong></span>
+        {% endif %}
     </div>
     
     <!-- Image Gallery -->
     {% if article.images.exists %}
         <div style="margin-bottom: 2.5rem;">
-            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-camera-retro" style="color: var(--accent-indigo);"></i> Gallery</h3>
+            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-camera-retro" style="color: var(--accent-indigo);"></i> Photo Gallery</h3>
             
             <!-- Featured Display Area -->
             <div id="gallery-featured" style="width: 100%; height: 450px; border-radius: 12px; border: 1px solid var(--border-glass); overflow: hidden; margin-bottom: 1.5rem;">
@@ -43,7 +48,39 @@
         </div>
     {% endif %}
 
+    <!-- Article Document & PDF Attachments -->
+    {% if article.attachments.exists %}
+        <div style="margin-bottom: 2.5rem;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-folder-open" style="color: var(--warning);"></i> Attached Files & Documents</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                {% for att in article.attachments.all %}
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); border-radius: 10px; padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; overflow: hidden;">
+                            {% if att.is_pdf %}
+                                <i class="fa-solid fa-file-pdf" style="font-size: 1.8rem; color: #f87171;"></i>
+                            {% elif att.is_doc %}
+                                <i class="fa-solid fa-file-word" style="font-size: 1.8rem; color: #60a5fa;"></i>
+                            {% elif att.is_image %}
+                                <i class="fa-solid fa-file-image" style="font-size: 1.8rem; color: #4ade80;"></i>
+                            {% else %}
+                                <i class="fa-solid fa-file" style="font-size: 1.8rem; color: var(--text-secondary);"></i>
+                            {% endif %}
+                            <div style="overflow: hidden;">
+                                <strong style="font-size: 0.9rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ att.file_name|default:att.file.name }}</strong>
+                                <span class="nav-user-badge" style="font-size: 0.7rem; padding: 0.1rem 0.4rem;">{{ att.file_extension }}</span>
+                            </div>
+                        </div>
+                        <a href="{{ att.file.url }}" target="_blank" download class="btn btn-primary btn-sm" style="padding: 0.4rem 0.8rem; white-space: nowrap;">
+                            <i class="fa-solid fa-download"></i> Download
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     <div class="detail-desc" style="white-space: pre-line; background: rgba(255,255,255,0.01); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-glass);">
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.75rem; color: var(--text-primary);"><i class="fa-solid fa-align-left" style="color: var(--accent-violet);"></i> Article Content</h3>
         {{ article.description }}
     </div>
 </div>

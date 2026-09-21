@@ -41,6 +41,34 @@ class ArticleImage(models.Model):
         return f"Image for {self.article.title}"
 
 
+class ArticleAttachment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='articles/attachments/')
+    file_name = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_image(self):
+        name = self.file_name or self.file.name
+        ext = name.split('.')[-1].lower()
+        return ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg']
+
+    def is_pdf(self):
+        name = self.file_name or self.file.name
+        return name.lower().endswith('.pdf')
+
+    def is_doc(self):
+        name = self.file_name or self.file.name
+        ext = name.split('.')[-1].lower()
+        return ext in ['doc', 'docx', 'txt', 'rtf', 'odt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx']
+
+    def file_extension(self):
+        name = self.file_name or self.file.name
+        return name.split('.')[-1].upper()
+
+    def __str__(self):
+        return f"Attachment {self.file_name or self.file.name} for {self.article.title}"
+
+
 class AuditLog(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='audit_logs')
     action = models.CharField(max_length=255)

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import Book, Article, ArticleImage, AuditLog
+from .models import Book, Article, ArticleImage, ArticleAttachment, AuditLog
 from .forms import BookUploadForm, ArticleUploadForm
 from .utils import log_action
 from accounts.models import CustomUser, Department, Group
@@ -47,14 +47,24 @@ def home_view(request):
                 Q(title__icontains=query)
             ).order_by('-created_at'))
         else:
-            # Deep Search: search inside PDF content for books, and full description/keywords for articles
-            articles_qs = approved_articles.filter(
-                Q(title__icontains=query) |
-                Q(description__icontains=query) |
-                Q(uploaded_by__username__icontains=query) |
-                Q(uploaded_by__first_name__icontains=query)
-            ).order_by('-created_at')
-            matching_articles = list(articles_qs)
+            # Deep Search: search inside PDF content for books, and full description/keywords/PDF attachments for articles
+            candidate_articles = list(approved_articles.order_by('-created_at'))
+            matched_a_list = []
+            for a in candidate_articles:
+                if (query.lower() in a.title.lower() or 
+                    query.lower() in a.description.lower() or 
+                    query.lower() in a.uploaded_by.username.lower()):
+                    matched_a_list.append(a)
+                else:
+                    # Check PDF attachments of the article
+                    pdf_match = False
+                    for att in a.attachments.all():
+                        if att.is_pdf() and pdf_contains_text(att.file, query):
+                            pdf_match = True
+                            break
+                    if pdf_match:
+                        matched_a_list.append(a)
+            matching_articles = matched_a_list
 
             # For books: check title, category_tag, uploader, AND pdf text content
             candidate_books = list(approved_books.order_by('-created_at'))
@@ -204,10 +214,17 @@ def article_upload_view(request):
             article.is_approved = False
             article.save()
             
-            # Handle multiple image uploads
-            images = request.FILES.getlist('images')
-            for img in images:
-                ArticleImage.objects.create(article=article, image=img)
+            # Handle multiple file uploads (photos, PDFs, Word/Text docs)
+            uploaded_files = request.FILES.getlist('files') or request.FILES.getlist('attachments') or request.FILES.getlist('images')
+            for f in uploaded_files:
+                ArticleAttachment.objects.create(
+                    article=article,
+                    file=f,
+                    file_name=f.name
+                )
+                ext = f.name.split('.')[-1].lower()
+                if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']:
+                    ArticleImage.objects.create(article=article, image=f)
                 
             messages.success(request, f"Article '{article.title}' uploaded successfully! It is currently pending approval by Faculty/Admin.")
             log_action(request.user, "Article Uploaded", f"Uploaded article '{article.title}' (Pending approval)")

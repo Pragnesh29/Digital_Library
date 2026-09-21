@@ -52,14 +52,14 @@ class ArticleUploadForm(forms.ModelForm):
         required=False,
         label="Show 'Uploaded By' name publicly"
     )
-    images = MultipleFileField(
+    files = MultipleFileField(
         required=False,
-        label="Upload Photos (Select multiple files)"
+        label="Upload Attachments (Photos, PDFs & Word/Text Docs)"
     )
 
     class Meta:
         model = Article
-        fields = ['title', 'description', 'show_uploader', 'images']
+        fields = ['title', 'description', 'show_uploader', 'files']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -69,3 +69,6 @@ class ArticleUploadForm(forms.ModelForm):
         self.fields['description'].widget.attrs['class'] = 'form-control'
         self.fields['description'].widget.attrs['placeholder'] = 'Enter Article Description'
         self.fields['description'].widget.attrs['rows'] = 5
+
+        if 'files' in self.fields:
+            self.fields['files'].widget.attrs['accept'] = 'image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.csv,.xls,.xlsx,.ppt,.pptx'
