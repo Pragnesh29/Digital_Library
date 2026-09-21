@@ -30,11 +30,21 @@ def signup_view(request):
         form = UserSignupForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_approved = False  # Explicitly set to false (handled by model save but good to be explicit)
+            user.is_approved = False  # Explicitly set to false
             user.save()
             messages.success(request, "Registration successful! Your account has been sent for admin approval.")
             log_action(None, "User Registered", f"New user '{user.username}' created and pending approval")
             return redirect('pending_approval')
+        else:
+            errors = []
+            for field, err_list in form.errors.items():
+                for err in err_list:
+                    if err not in errors and 'required' not in err.lower():
+                        errors.append(err)
+            if errors:
+                messages.error(request, f"Registration failed! {' | '.join(errors)}")
+            else:
+                messages.error(request, "Registration failed! Please review the form fields and correct the highlighted errors.")
     else:
         form = UserSignupForm()
     return render(request, 'accounts/signup.html', {'form': form})
