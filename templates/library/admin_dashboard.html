@@ -77,6 +77,9 @@
 <!-- Pending Users Tab -->
 <div id="users-tab" class="tab-content active">
     {% if pending_users %}
+        <div style="margin-bottom: 1.5rem; max-width: 500px;">
+            <input type="text" id="search-pending-user-input" class="form-control" placeholder="Search pending users by name, email, department...">
+        </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
                 <thead>
@@ -127,6 +130,12 @@
                             </td>
                         </tr>
                     {% endfor %}
+                    <tr id="no-pending-users-row" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No matching pending user records found.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div id="pending-users-pagination"></div>
@@ -141,6 +150,9 @@
 <!-- Pending Books Tab -->
 <div id="books-tab" class="tab-content">
     {% if pending_books %}
+        <div style="margin-bottom: 1.5rem; max-width: 500px;">
+            <input type="text" id="search-pending-book-input" class="form-control" placeholder="Search pending books by title, category, uploader...">
+        </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
                 <thead>
@@ -221,6 +233,12 @@
                             </td>
                         </tr>
                     {% endfor %}
+                    <tr id="no-pending-books-row" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No matching pending book records found.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div id="pending-books-pagination"></div>
@@ -235,6 +253,9 @@
 <!-- Pending Articles Tab -->
 <div id="articles-tab" class="tab-content">
     {% if pending_articles %}
+        <div style="margin-bottom: 1.5rem; max-width: 500px;">
+            <input type="text" id="search-pending-article-input" class="form-control" placeholder="Search pending articles by title, description, uploader...">
+        </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
                 <thead>
@@ -304,6 +325,12 @@
                             </td>
                         </tr>
                     {% endfor %}
+                    <tr id="no-pending-articles-row" style="display: none;">
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No matching pending article records found.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div id="pending-articles-pagination"></div>
@@ -832,12 +859,15 @@
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">View and manage user submitted feedback, suggestions, and attached photos/screenshots.</p>
         </div>
         
-        <!-- Feedback Status Filters: All, Pending, Resolved, Ignored -->
-        <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.35rem; border-radius: 8px; border: 1px solid var(--border-glass);" id="feedback-status-filters">
-            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn active-fb-filter" onclick="filterFeedbackStatus('all', this)" style="font-size: 0.8rem; background: var(--accent-indigo); color: white;">All</button>
-            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('pending', this)" style="font-size: 0.8rem;">Pending</button>
-            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('resolved', this)" style="font-size: 0.8rem;">Resolved</button>
-            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('ignored', this)" style="font-size: 0.8rem;">Ignored</button>
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1; max-width: 700px; justify-content: flex-end;">
+            <input type="text" id="search-feedback-input" class="form-control" placeholder="Search feedbacks by user, subject, message..." style="flex: 1; min-width: 250px;">
+            <!-- Feedback Status Filters: All, Pending, Resolved, Ignored -->
+            <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.35rem; border-radius: 8px; border: 1px solid var(--border-glass);" id="feedback-status-filters">
+                <button type="button" class="btn btn-secondary btn-sm fb-filter-btn active-fb-filter" onclick="filterFeedbackStatus('all', this)" style="font-size: 0.8rem; background: var(--accent-indigo); color: white;">All</button>
+                <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('pending', this)" style="font-size: 0.8rem;">Pending</button>
+                <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('resolved', this)" style="font-size: 0.8rem;">Resolved</button>
+                <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('ignored', this)" style="font-size: 0.8rem;">Ignored</button>
+            </div>
         </div>
     </div>
 
@@ -1239,21 +1269,23 @@
     }
 
     let feedbacksPag = null;
-    function filterFeedbackStatus(status, btn) {
-        const filterBtns = document.querySelectorAll('.fb-filter-btn');
-        filterBtns.forEach(b => {
-            b.style.background = 'transparent';
-            b.style.color = 'var(--text-secondary)';
-        });
-        btn.style.background = 'var(--accent-indigo)';
-        btn.style.color = 'white';
+    let currentFeedbackStatus = 'all';
+
+    function filterFeedbacks() {
+        const searchInput = document.getElementById('search-feedback-input');
+        const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
         const rows = document.querySelectorAll('.feedback-row');
         let visibleCount = 0;
 
         rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
             const rowStatus = row.getAttribute('data-status');
-            if (status === 'all' || rowStatus === status) {
+
+            let matchesSearch = !searchVal || text.includes(searchVal);
+            let matchesStatus = (currentFeedbackStatus === 'all' || rowStatus === currentFeedbackStatus);
+
+            if (matchesSearch && matchesStatus) {
                 row.dataset.filteredOut = 'false';
                 visibleCount++;
             } else {
@@ -1267,6 +1299,19 @@
         }
 
         if (feedbacksPag) feedbacksPag.reset();
+    }
+
+    function filterFeedbackStatus(status, btn) {
+        currentFeedbackStatus = status;
+        const filterBtns = document.querySelectorAll('.fb-filter-btn');
+        filterBtns.forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-secondary)';
+        });
+        btn.style.background = 'var(--accent-indigo)';
+        btn.style.color = 'white';
+
+        filterFeedbacks();
     }
 
     // Initial setup on DOM Content Loaded
@@ -1309,6 +1354,10 @@
         logsPag = createPaginator({ itemSelector: '.log-row', paginationContainerId: 'logs-pagination', pageSize: 30 });
         feedbacksPag = createPaginator({ itemSelector: '.feedback-row', paginationContainerId: 'feedbacks-pagination', pageSize: 30 });
 
+        setupInstantTableFilter('search-pending-user-input', 'pending-user-row', 'no-pending-users-row', pendingUsersPag);
+        setupInstantTableFilter('search-pending-book-input', 'pending-book-row', 'no-pending-books-row', pendingBooksPag);
+        setupInstantTableFilter('search-pending-article-input', 'pending-article-row', 'no-pending-articles-row', pendingArticlesPag);
+
         setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row', allUsersPag);
         setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row', allBooksPag);
         setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row', allArticlesPag);
@@ -1321,6 +1370,12 @@
         if (searchLogInput && logTypeFilter) {
             searchLogInput.addEventListener('input', filterLogs);
             logTypeFilter.addEventListener('change', filterLogs);
+        }
+
+        // Feedback tab search filter
+        const searchFeedbackInput = document.getElementById('search-feedback-input');
+        if (searchFeedbackInput) {
+            searchFeedbackInput.addEventListener('input', filterFeedbacks);
         }
     });
 </script>
