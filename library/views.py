@@ -104,21 +104,25 @@ def home_view(request):
     # Merge highlighted list for carousel
     carousel_items = []
     for b in highlighted_books:
+        cat_name = b.get_category_name()
         carousel_items.append({
             'type': 'book',
+            'type_label': 'Book',
             'title': b.title,
-            'tag': b.category_tag,
+            'tag': cat_name,
             'image': b.cover_image.url if b.cover_image else None,
             'url_name': 'book_detail',
             'pk': b.pk,
-            'desc': f"Category: {b.category_tag} | Uploaded by {b.uploaded_by.username}"
+            'desc': f"Category: {cat_name} | Uploaded by {b.uploaded_by.username}"
         })
     for a in highlighted_articles:
         first_img = a.images.first()
+        cat_name = a.get_category_name()
         carousel_items.append({
             'type': 'article',
+            'type_label': 'Article',
             'title': a.title,
-            'tag': 'Article',
+            'tag': cat_name,
             'image': first_img.image.url if first_img else None,
             'url_name': 'article_detail',
             'pk': a.pk,
