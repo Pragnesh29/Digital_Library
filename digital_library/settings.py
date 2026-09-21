@@ -115,8 +115,6 @@ USE_TZ = True
 
 
 # ── Sub‑path & Static/Media configuration ────────────────────────────────
-FORCE_SCRIPT_NAME = '/digital_library'
-
 STATIC_URL = '/digital_library/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
