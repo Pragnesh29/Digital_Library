@@ -24,7 +24,7 @@
         <select id="category-filter" class="form-control">
             <option value="">-- All Categories --</option>
             {% for cat in categories %}
-                <option value="{{ cat }}">{{ cat }}</option>
+                <option value="{{ cat.name }}">{{ cat.name }}</option>
             {% endfor %}
         </select>
     </div>
@@ -49,7 +49,7 @@
 {% if books %}
     <div class="catalog-grid" id="books-grid">
         {% for book in books %}
-            <div class="glass book-card" data-category="{{ book.category_tag|escapejs }}" data-departments="{% for dept in book.restricted_to_departments.all %}{{ dept.pk }},{% endfor %}">
+            <div class="glass book-card" data-category="{{ book.get_category_name|escapejs }}" data-departments="{% for dept in book.restricted_to_departments.all %}{{ dept.pk }},{% endfor %}">
                 <div class="book-cover-container">
                     {% if book.cover_image %}
                         <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover">
@@ -71,7 +71,7 @@
                 </div>
                 
                 <div class="book-details">
-                    <span class="book-category">{{ book.category_tag }}</span>
+                    <span class="book-category">{{ book.get_category_name }}</span>
                     <h3 class="book-title">{{ book.title }}</h3>
                     {% if book.show_uploader %}
                         <p class="book-author">Uploaded by: {{ book.uploaded_by.username }}</p>

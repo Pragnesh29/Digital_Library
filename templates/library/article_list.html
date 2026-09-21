@@ -12,14 +12,25 @@
     </div>
 </div>
 
-<!-- Instant Client-Side Search Form -->
-<form onsubmit="event.preventDefault();" class="glass" style="padding: 1.5rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: end;">
-    <div class="form-group" style="margin-bottom: 0; flex: 1;">
+<!-- Instant Client-Side Search & Category Filter Form -->
+<form onsubmit="event.preventDefault();" class="glass" style="padding: 1.5rem; margin-bottom: 2rem; display: grid; grid-template-columns: 2fr 1fr auto; gap: 1rem; align-items: end;">
+    <div class="form-group" style="margin-bottom: 0;">
         <label for="search-input" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Search by Article Title or Description</label>
         <input type="text" id="search-input" class="form-control" placeholder="Type keywords to filter instantly...">
     </div>
+    
+    <div class="form-group" style="margin-bottom: 0;">
+        <label for="category-filter" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Category Filter</label>
+        <select id="category-filter" class="form-control">
+            <option value="">-- All Categories --</option>
+            {% for cat in categories %}
+                <option value="{{ cat.name }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
     <div>
-        <button type="button" class="btn btn-secondary" onclick="resetSearch();" title="Reset search" style="padding: 0.75rem 1.25rem;">
+        <button type="button" class="btn btn-secondary" onclick="resetSearch();" title="Reset all filters" style="padding: 0.75rem 1.25rem; width: 100%;">
             <i class="fa-solid fa-rotate-left"></i> Reset
         </button>
     </div>
@@ -28,7 +39,8 @@
 {% if articles %}
     <div class="catalog-grid" id="articles-grid">
         {% for article in articles %}
-            <div class="glass article-card">
+            <div class="glass article-card" data-category="{{ article.get_category_name|escapejs }}">
+                <span class="book-category" style="margin-bottom: 0.5rem; display: inline-block;">{{ article.get_category_name }}</span>
                 <h3 class="article-title">{{ article.title }}</h3>
                 <p class="article-desc">{{ article.description }}</p>
                 
@@ -59,7 +71,7 @@
         <div id="no-results-msg" class="glass" style="display: none; padding: 4rem 2rem; text-align: center; width: 100%; grid-column: 1 / -1;">
             <i class="fa-solid fa-magnifying-glass" style="font-size: 4.5rem; color: var(--text-secondary); margin-bottom: 1.5rem; opacity: 0.6;"></i>
             <h3>No Matching Articles Found</h3>
-            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try adjusting your search terms to find matching articles.</p>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try adjusting your search terms or category filter to find matching articles.</p>
         </div>
     </div>
 {% else %}
@@ -76,14 +88,19 @@
 <script>
     function filterArticles() {
         const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+        const categoryVal = document.getElementById('category-filter').value.toLowerCase().trim();
         const cards = document.querySelectorAll('.article-card');
         let visibleCount = 0;
         
         cards.forEach(card => {
             const title = card.querySelector('.article-title').textContent.toLowerCase();
             const desc = card.querySelector('.article-desc').textContent.toLowerCase();
+            const category = (card.getAttribute('data-category') || '').toLowerCase();
             
-            if (!searchVal || title.includes(searchVal) || desc.includes(searchVal)) {
+            const matchesSearch = !searchVal || title.includes(searchVal) || desc.includes(searchVal);
+            const matchesCategory = !categoryVal || category === categoryVal;
+            
+            if (matchesSearch && matchesCategory) {
                 card.style.display = '';
                 visibleCount++;
             } else {
@@ -93,19 +110,17 @@
         
         const noResults = document.getElementById('no-results-msg');
         if (noResults) {
-            if (visibleCount === 0) {
-                noResults.style.display = 'block';
-            } else {
-                noResults.style.display = 'none';
-            }
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
         }
     }
 
     function resetSearch() {
         document.getElementById('search-input').value = '';
+        document.getElementById('category-filter').value = '';
         filterArticles();
     }
 
     document.getElementById('search-input').addEventListener('input', filterArticles);
+    document.getElementById('category-filter').addEventListener('change', filterArticles);
 </script>
 {% endblock %}

@@ -30,9 +30,9 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label for="{{ form.category_tag.id_for_label }}">{{ form.category_tag.label }}</label>
-                {{ form.category_tag }}
-                {% for error in form.category_tag.errors %}
+                <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+                {{ form.category }}
+                {% for error in form.category.errors %}
                     <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
                 {% endfor %}
             </div>

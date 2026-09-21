@@ -136,7 +136,7 @@ def book_list_view(request):
     
     # Fetch lists for dropdown filters
     departments = Department.objects.all()
-    categories = Book.objects.filter(is_approved=True).values_list('category_tag', flat=True).distinct()
+    categories = Category.objects.filter(Q(target_type='book') | Q(target_type='both'))
     
     context = {
         'books': books,
@@ -176,6 +176,8 @@ def book_upload_view(request):
         if form.is_valid():
             book = form.save(commit=False)
             book.uploaded_by = request.user
+            if book.category:
+                book.category_tag = book.category.name
             book.is_approved = False  # Always goes to admin approval
             book.save()
             form.save_m2m() # Required to save ManyToMany restricted departments/groups
@@ -191,8 +193,10 @@ def book_upload_view(request):
 @login_required
 def article_list_view(request):
     articles = Article.objects.filter(is_approved=True).order_by('-created_at')
+    categories = Category.objects.filter(Q(target_type='article') | Q(target_type='both'))
     context = {
         'articles': articles,
+        'categories': categories,
     }
     return render(request, 'library/article_list.html', context)
 
@@ -288,7 +292,7 @@ def admin_dashboard_view(request):
     all_users = CustomUser.objects.all().order_by('-date_joined') if is_admin else None
     all_books = Book.objects.all().order_by('-created_at')
     all_articles = Article.objects.all().order_by('-created_at')
-    audit_logs = AuditLog.objects.all().order_by('-timestamp') if is_admin else None
+    all_categories = Category.objects.all().order_by('name')
     
     context = {
         'pending_users': pending_users,
@@ -299,9 +303,46 @@ def admin_dashboard_view(request):
         'all_users': all_users,
         'all_books': all_books,
         'all_articles': all_articles,
+        'all_categories': all_categories,
         'audit_logs': audit_logs,
     }
     return render(request, 'library/admin_dashboard.html', context)
+
+@login_required
+def manage_categories_view(request):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'add':
+            name = request.POST.get('name', '').strip()
+            target_type = request.POST.get('target_type', 'both')
+            if name:
+                cat, created = Category.objects.get_or_create(
+                    name=name,
+                    defaults={'target_type': target_type}
+                )
+                if created:
+                    messages.success(request, f"Category '{name}' created successfully!")
+                    log_action(user, "Category Created", f"Created category '{name}' ({target_type})")
+                else:
+                    cat.target_type = target_type
+                    cat.save()
+                    messages.info(request, f"Category '{name}' target type updated to {target_type}.")
+            else:
+                messages.error(request, "Category name cannot be empty.")
+        elif action == 'delete':
+            cat_id = request.POST.get('category_id')
+            cat = get_object_or_404(Category, pk=cat_id)
+            cat_name = cat.name
+            cat.delete()
+            messages.success(request, f"Category '{cat_name}' deleted successfully.")
+            log_action(user, "Category Deleted", f"Deleted category '{cat_name}'")
+            
+    return redirect('admin_dashboard')
 
 @login_required
 def approve_user_view(request, user_id):

@@ -22,6 +22,9 @@
             <a href="/admin/accounts/group/" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; background: rgba(255,255,255,0.05);">
                 <i class="fa-solid fa-people-group"></i> Manage Groups
             </a>
+            <a href="/admin/library/category/" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; background: rgba(255,255,255,0.05);">
+                <i class="fa-solid fa-tags"></i> Manage Categories
+            </a>
         </div>
     </div>
 {% endif %}
@@ -35,6 +38,9 @@
     </button>
     <button class="tab-btn" id="btn-articles-tab" onclick="openTab(event, 'articles-tab')">
         <i class="fa-solid fa-folder-plus"></i> Pending Articles ({{ pending_articles.count }})
+    </button>
+    <button class="tab-btn" id="btn-categories-tab" onclick="openTab(event, 'categories-tab')">
+        <i class="fa-solid fa-tags"></i> Categories ({{ all_categories.count }})
     </button>
     <button class="tab-btn" id="btn-highlights-tab" onclick="openTab(event, 'highlights-tab')">
         <i class="fa-solid fa-star"></i> Highlight Manager
@@ -238,6 +244,88 @@
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
             <p style="color: var(--text-secondary);"><i class="fa-solid fa-circle-check" style="color: var(--success); margin-right: 0.5rem;"></i> No pending articles to approve.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Category Management Tab -->
+<div id="categories-tab" class="tab-content">
+    <!-- Add Category Form -->
+    <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);">
+            <i class="fa-solid fa-plus-circle" style="color: var(--accent-indigo);"></i> Add New Category
+        </h3>
+        <form method="POST" action="{% url 'manage_categories' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <div style="flex: 2; min-width: 200px;">
+                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Category Name</label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. Defence, Research, Technology" required>
+            </div>
+            <div style="flex: 1.5; min-width: 180px;">
+                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Target Module</label>
+                <select name="target_type" class="form-control">
+                    <option value="both">Both (Books & Articles)</option>
+                    <option value="book">Books Only</option>
+                    <option value="article">Articles Only</option>
+                </select>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                    <i class="fa-solid fa-check"></i> Add Category
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Categories List Table -->
+    {% if all_categories %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Target Module</th>
+                        <th>Associated Books</th>
+                        <th>Associated Articles</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in all_categories %}
+                        <tr>
+                            <td><strong>{{ cat.name }}</strong></td>
+                            <td>
+                                {% if cat.target_type == 'both' %}
+                                    <span class="nav-user-badge" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border-color: rgba(99, 102, 241, 0.3);">Both (Books & Articles)</span>
+                                {% elif cat.target_type == 'book' %}
+                                    <span class="nav-user-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Books Only</span>
+                                {% else %}
+                                    <span class="nav-user-badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border-color: rgba(139, 92, 246, 0.3);">Articles Only</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ cat.books.count }}</td>
+                            <td>{{ cat.articles.count }}</td>
+                            <td>{{ cat.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <form method="POST" action="{% url 'manage_categories' %}" onsubmit="return confirm('Are you sure you want to delete category \'{{ cat.name }}\'?');" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="category_id" value="{{ cat.pk }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
+                                        <i class="fa-solid fa-trash-can"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);">No categories created yet.</p>
         </div>
     {% endif %}
 </div>

@@ -1,5 +1,6 @@
 from django import forms
-from .models import Book, Article
+from django.db.models import Q
+from .models import Book, Article, Category
 from accounts.models import Department, Group
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -17,6 +18,12 @@ class MultipleFileField(forms.FileField):
         return [single_file_clean(data, initial)]
 
 class BookUploadForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=True,
+        empty_label="-- Select Category --",
+        label="Book Category"
+    )
     show_uploader = forms.BooleanField(
         initial=True,
         required=False,
@@ -37,16 +44,23 @@ class BookUploadForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ['title', 'pdf', 'cover_image', 'category_tag', 'show_uploader', 'restricted_to_departments', 'restricted_to_groups']
+        fields = ['title', 'pdf', 'cover_image', 'category', 'show_uploader', 'restricted_to_departments', 'restricted_to_groups']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Apply premium form styling classes
-        for name in ['title', 'pdf', 'cover_image', 'category_tag']:
+        self.fields['category'].queryset = Category.objects.filter(Q(target_type='book') | Q(target_type='both'))
+        for name in ['title', 'pdf', 'cover_image', 'category']:
             self.fields[name].widget.attrs['class'] = 'form-control'
-            self.fields[name].widget.attrs['placeholder'] = f'Enter {self.fields[name].label}'
+            if name != 'category':
+                self.fields[name].widget.attrs['placeholder'] = f'Enter {self.fields[name].label}'
 
 class ArticleUploadForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=False,
+        empty_label="-- Select Category --",
+        label="Article Category"
+    )
     show_uploader = forms.BooleanField(
         initial=True,
         required=False,
@@ -59,12 +73,15 @@ class ArticleUploadForm(forms.ModelForm):
 
     class Meta:
         model = Article
-        fields = ['title', 'description', 'show_uploader', 'files']
+        fields = ['title', 'description', 'category', 'show_uploader', 'files']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.filter(Q(target_type='article') | Q(target_type='both'))
         self.fields['title'].widget.attrs['class'] = 'form-control'
         self.fields['title'].widget.attrs['placeholder'] = 'Enter Article Title'
+        
+        self.fields['category'].widget.attrs['class'] = 'form-control'
         
         self.fields['description'].widget.attrs['class'] = 'form-control'
         self.fields['description'].widget.attrs['placeholder'] = 'Enter Article Description'

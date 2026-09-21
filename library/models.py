@@ -1,11 +1,30 @@
 from django.db import models
 from accounts.models import CustomUser, Department, Group
 
+class Category(models.Model):
+    TARGET_CHOICES = (
+        ('both', 'Both (Books & Articles)'),
+        ('book', 'Books Only'),
+        ('article', 'Articles Only'),
+    )
+    name = models.CharField(max_length=100, unique=True)
+    target_type = models.CharField(max_length=20, choices=TARGET_CHOICES, default='both')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Categories'
+
+    def __str__(self):
+        return f"{self.name} ({self.get_target_type_display()})"
+
+
 class Book(models.Model):
     title = models.CharField(max_length=200)
     pdf = models.FileField(upload_to='books/pdfs/')
     cover_image = models.ImageField(upload_to='books/covers/', blank=True, null=True)
-    category_tag = models.CharField(max_length=50)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='books')
+    category_tag = models.CharField(max_length=50, blank=True)
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='uploaded_books')
     show_uploader = models.BooleanField(default=True, verbose_name="Show Uploader Name")
     is_approved = models.BooleanField(default=False)
@@ -17,18 +36,29 @@ class Book(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def get_category_name(self):
+        if self.category:
+            return self.category.name
+        return self.category_tag or "General"
+
     def __str__(self):
         return self.title
 
 class Article(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='articles')
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='uploaded_articles')
     show_uploader = models.BooleanField(default=True, verbose_name="Show Uploader Name")
     is_approved = models.BooleanField(default=False)
     is_highlighted = models.BooleanField(default=False)
     
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_category_name(self):
+        if self.category:
+            return self.category.name
+        return "General"
 
     def __str__(self):
         return self.title
