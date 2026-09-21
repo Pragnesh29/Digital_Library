@@ -160,7 +160,14 @@
                 <tbody>
                     {% for book in pending_books %}
                         <tr>
-                            <td><strong>{{ book.title }}</strong></td>
+                            <td>
+                                <strong>{{ book.title }}</strong>
+                                {% if book.description %}
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ book.description }}">
+                                        {{ book.description }}
+                                    </div>
+                                {% endif %}
+                            </td>
                             <td>{{ book.category_tag }}</td>
                             <td>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
                             <td>
@@ -706,6 +713,11 @@
                                 <strong>{{ book.title }}</strong>
                                 {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
                                     <span style="font-size: 0.75rem; color: var(--danger); margin-left: 0.5rem;" title="Visible only to target departments or groups"><i class="fa-solid fa-lock"></i> Restricted</span>
+                                {% endif %}
+                                {% if book.description %}
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ book.description }}">
+                                        {{ book.description }}
+                                    </div>
                                 {% endif %}
                             </td>
                             <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99,102,241,0.1);">{{ book.category_tag }}</span></td>

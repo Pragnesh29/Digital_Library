@@ -73,6 +73,11 @@
                 <div class="book-details">
                     <span class="book-category">{{ book.get_category_name }}</span>
                     <h3 class="book-title">{{ book.title }}</h3>
+                    {% if book.description %}
+                        <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0.3rem 0 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;" title="{{ book.description }}">
+                            {{ book.description }}
+                        </p>
+                    {% endif %}
                     {% if book.show_uploader %}
                         <p class="book-author">Uploaded by: {{ book.uploaded_by.username }}</p>
                     {% elif user.is_staff or user.role == 'admin' or user.role == 'faculty' %}

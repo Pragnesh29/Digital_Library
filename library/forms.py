@@ -44,7 +44,7 @@ class BookUploadForm(forms.ModelForm):
 
     class Meta:
         model = Book
-        fields = ['title', 'pdf', 'cover_image', 'category', 'show_uploader', 'restricted_to_departments', 'restricted_to_groups']
+        fields = ['title', 'description', 'pdf', 'cover_image', 'category', 'show_uploader', 'restricted_to_departments', 'restricted_to_groups']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,6 +54,12 @@ class BookUploadForm(forms.ModelForm):
                 self.fields[name].widget.attrs['class'] = 'form-control'
                 if name != 'category':
                     self.fields[name].widget.attrs['placeholder'] = f'Enter {self.fields[name].label}'
+        if 'description' in self.fields:
+            self.fields['description'].widget = forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter Book Description or Summary (optional)...',
+                'rows': 4
+            })
         if self.instance and self.instance.pk:
             self.fields['pdf'].required = False
             self.fields['cover_image'].required = False

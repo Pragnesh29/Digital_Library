@@ -44,6 +44,13 @@
             <span><i class="fa-solid fa-calendar-days" style="color: var(--accent-violet); margin-right: 0.25rem;"></i> Added on: <strong>{{ book.created_at|date:"M d, Y" }}</strong></span>
         </div>
         
+        {% if book.description %}
+            <div class="glass" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-align-left" style="color: var(--accent-indigo);"></i> Book Description / Summary</h3>
+                <p style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6; white-space: pre-line;">{{ book.description }}</p>
+            </div>
+        {% endif %}
+        
         <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
             <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-shield-halved" style="color: var(--accent-indigo);"></i> Visibility Permissions</h3>
             <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">

@@ -41,6 +41,20 @@
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
             {% endfor %}
         </div>
+
+        <!-- Description Field with Checkbox -->
+        <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label for="{{ form.description.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Description / Summary</label>
+                <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                    <input type="checkbox" id="user_chk_desc" checked onchange="toggleInput('user_chk_desc', '{{ form.description.id_for_label }}')"> Update Description
+                </label>
+            </div>
+            {{ form.description }}
+            {% for error in form.description.errors %}
+                <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
+            {% endfor %}
+        </div>
         
         <div class="form-row">
             <!-- Category Field with Checkbox -->
