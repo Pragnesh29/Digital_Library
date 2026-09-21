@@ -59,7 +59,7 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            user = authenticate(request=request, username=username, password=password)
             if user is not None:
                 if user.is_approved:
                     login(request, user)
@@ -68,12 +68,16 @@ def login_view(request):
                 else:
                     messages.error(request, "Your account is pending approval by the administration. You will be able to log in once approved.")
             else:
-                messages.error(request, "Invalid username or password.")
+                messages.error(request, "Invalid username/email or password.")
         else:
-            messages.error(request, "Invalid username or password.")
+            messages.error(request, "Invalid username/email or password.")
     else:
         form = AuthenticationForm()
         
+    # Update label for username field to show Username or Email Address
+    if 'username' in form.fields:
+        form.fields['username'].label = "Username or Email Address"
+
     # Apply styling classes to input elements
     for field_name, field in form.fields.items():
         field.widget.attrs['class'] = 'form-control'
