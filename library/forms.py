@@ -1,6 +1,6 @@
 from django import forms
 from django.db.models import Q
-from .models import Book, Article, Category
+from .models import Book, Article, Category, Feedback
 from accounts.models import Department, Group
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -101,3 +101,23 @@ class ArticleUploadForm(forms.ModelForm):
 
         if 'files' in self.fields:
             self.fields['files'].widget.attrs['accept'] = 'image/*,.pdf,.doc,.docx,.txt,.rtf,.odt,.csv,.xls,.xlsx,.ppt,.pptx'
+
+class FeedbackForm(forms.ModelForm):
+    images = MultipleFileField(
+        required=False,
+        label="Attach Photos / Screenshots (Optional)"
+    )
+
+    class Meta:
+        model = Feedback
+        fields = ['subject', 'message', 'images']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['subject'].widget.attrs['class'] = 'form-control'
+        self.fields['subject'].widget.attrs['placeholder'] = 'Enter Feedback Subject'
+        self.fields['message'].widget.attrs['class'] = 'form-control'
+        self.fields['message'].widget.attrs['placeholder'] = 'Describe your feedback or issue in detail...'
+        self.fields['message'].widget.attrs['rows'] = 5
+        if 'images' in self.fields:
+            self.fields['images'].widget.attrs['accept'] = 'image/*'

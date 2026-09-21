@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Book, Article, ArticleImage, ArticleAttachment, AuditLog
+from .models import Category, Book, Article, ArticleImage, ArticleAttachment, AuditLog, Feedback, FeedbackImage
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -29,3 +29,13 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_display = ('user', 'action', 'timestamp')
     list_filter = ('action',)
     search_fields = ('action', 'details')
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'user', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('subject', 'message', 'user__username')
+
+@admin.register(FeedbackImage)
+class FeedbackImageAdmin(admin.ModelAdmin):
+    list_display = ('feedback', 'image', 'created_at')

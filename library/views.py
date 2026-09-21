@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import Category, Book, Article, ArticleImage, ArticleAttachment, AuditLog
-from .forms import BookUploadForm, ArticleUploadForm
+from .models import Category, Book, Article, ArticleImage, ArticleAttachment, AuditLog, Feedback, FeedbackImage
+from .forms import BookUploadForm, ArticleUploadForm, FeedbackForm
 from .utils import log_action
 from accounts.models import CustomUser, Department, Group
 
@@ -321,6 +321,8 @@ def admin_dashboard_view(request):
     all_books = Book.objects.all().order_by('-created_at')
     all_articles = Article.objects.all().order_by('-created_at')
     all_categories = Category.objects.all().order_by('name')
+    all_feedbacks = Feedback.objects.all().order_by('-created_at')
+    pending_feedbacks_count = Feedback.objects.filter(status='pending').count()
     
     context = {
         'pending_users': pending_users,
@@ -333,8 +335,49 @@ def admin_dashboard_view(request):
         'all_articles': all_articles,
         'all_categories': all_categories,
         'audit_logs': audit_logs,
+        'all_feedbacks': all_feedbacks,
+        'pending_feedbacks_count': pending_feedbacks_count,
     }
     return render(request, 'library/admin_dashboard.html', context)
+
+@login_required
+def feedback_view(request):
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST, request.FILES)
+        if form.is_valid():
+            fb = form.save(commit=False)
+            fb.user = request.user
+            fb.save()
+
+            uploaded_images = request.FILES.getlist('images')
+            for img in uploaded_images:
+                FeedbackImage.objects.create(feedback=fb, image=img)
+
+            messages.success(request, "Thank you! Your feedback has been submitted successfully.")
+            log_action(request.user, "Feedback Submitted", f"Submitted feedback #{fb.id}: {fb.subject}")
+            return redirect('user_dashboard')
+        else:
+            messages.error(request, "Failed to submit feedback. Please check form errors.")
+    else:
+        form = FeedbackForm()
+    return render(request, 'library/feedback.html', {'form': form})
+
+@login_required
+def update_feedback_status_view(request, pk):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    fb = get_object_or_404(Feedback, pk=pk)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in ['pending', 'resolved', 'ignored']:
+            fb.status = new_status
+            fb.save()
+            messages.success(request, f"Feedback #{fb.id} status updated to '{new_status.title()}'.")
+            log_action(user, "Feedback Status Updated", f"Updated feedback #{fb.id} status to '{new_status}'")
+    return redirect('admin_dashboard')
 
 @login_required
 def manage_categories_view(request):

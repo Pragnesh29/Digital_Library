@@ -31,4 +31,8 @@ urlpatterns = [
     path('admin-dashboard/edit-book/<int:book_id>/', views.edit_book_view, name='edit_book'),
     path('admin-dashboard/edit-article/<int:article_id>/', views.edit_article_view, name='edit_article'),
     path('admin-dashboard/manage-categories/', views.manage_categories_view, name='manage_categories'),
+    
+    # Feedback
+    path('feedback/', views.feedback_view, name='feedback'),
+    path('admin-dashboard/feedback/<int:pk>/update-status/', views.update_feedback_status_view, name='update_feedback_status'),
 ]

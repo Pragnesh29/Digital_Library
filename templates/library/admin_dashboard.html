@@ -56,6 +56,9 @@
     <button class="tab-btn" id="btn-all-articles-tab" onclick="openTab(event, 'all-articles-tab')">
         <i class="fa-regular fa-newspaper"></i> All Articles ({{ all_articles.count }})
     </button>
+    <button class="tab-btn" id="btn-feedback-tab" onclick="openTab(event, 'feedback-tab')">
+        <i class="fa-solid fa-comments"></i> Feedbacks ({% if pending_feedbacks_count %}<span style="background: var(--accent-indigo); color: white; border-radius: 10px; padding: 0.1rem 0.45rem; font-size: 0.75rem;">{{ pending_feedbacks_count }}</span>{% else %}0{% endif %})
+    </button>
     {% if user.role == 'superuser' or user.is_superuser %}
         <button class="tab-btn" id="btn-logs-tab" onclick="openTab(event, 'logs-tab')">
             <i class="fa-solid fa-clock-rotate-left"></i> Activity Logs ({{ audit_logs.count }})
@@ -667,10 +670,143 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Feedback Tab -->
+<div id="feedback-tab" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="font-size: 1.2rem; color: var(--text-primary);"><i class="fa-solid fa-comments" style="color: var(--accent-indigo); margin-right: 0.5rem;"></i> User Feedbacks</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">View and manage user submitted feedback, suggestions, and attached photos/screenshots.</p>
+        </div>
+        
+        <!-- Feedback Status Filters: All, Pending, Resolved, Ignored -->
+        <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.35rem; border-radius: 8px; border: 1px solid var(--border-glass);" id="feedback-status-filters">
+            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn active-fb-filter" onclick="filterFeedbackStatus('all', this)" style="font-size: 0.8rem; background: var(--accent-indigo); color: white;">All</button>
+            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('pending', this)" style="font-size: 0.8rem;">Pending</button>
+            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('resolved', this)" style="font-size: 0.8rem;">Resolved</button>
+            <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('ignored', this)" style="font-size: 0.8rem;">Ignored</button>
+        </div>
+    </div>
+
+    {% if all_feedbacks %}
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>User</th>
+                        <th>Subject & Message</th>
+                        <th>Attached Photos</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fb in all_feedbacks %}
+                        <tr class="feedback-row" data-status="{{ fb.status }}">
+                            <td style="font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap;">
+                                {{ fb.created_at|date:"M d, Y H:i" }}
+                            </td>
+                            <td>
+                                <strong>{{ fb.user.username }}</strong><br>
+                                <small style="color: var(--text-secondary);">{{ fb.user.email|default:"No email" }}</small>
+                            </td>
+                            <td style="max-width: 320px;">
+                                <strong style="color: var(--text-primary); display: block; margin-bottom: 0.35rem;">{{ fb.subject }}</strong>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message }}</span>
+                            </td>
+                            <td>
+                                {% if fb.images.all %}
+                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                        {% for img in fb.images.all %}
+                                            <a href="{{ img.image.url }}" target="_blank" title="Click to view full photo">
+                                                <img src="{{ img.image.url }}" alt="Feedback photo" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-glass);">
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span style="font-size: 0.8rem; color: var(--text-secondary); opacity: 0.6;">No photos</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if fb.status == 'pending' %}
+                                    <span class="status-badge status-pending"><i class="fa-solid fa-clock"></i> Pending</span>
+                                {% elif fb.status == 'resolved' %}
+                                    <span class="status-badge status-approved"><i class="fa-solid fa-check-circle"></i> Resolved</span>
+                                {% else %}
+                                    <span class="status-badge" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3);"><i class="fa-solid fa-ban"></i> Ignored</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{% url 'update_feedback_status' fb.pk %}" style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                                    {% csrf_token %}
+                                    {% if fb.status != 'resolved' %}
+                                        <button type="submit" name="status" value="resolved" class="btn btn-sm" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                            <i class="fa-solid fa-check"></i> Resolve
+                                        </button>
+                                    {% endif %}
+                                    {% if fb.status != 'pending' %}
+                                        <button type="submit" name="status" value="pending" class="btn btn-sm" style="background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                            <i class="fa-solid fa-clock"></i> Pending
+                                        </button>
+                                    {% endif %}
+                                    {% if fb.status != 'ignored' %}
+                                        <button type="submit" name="status" value="ignored" class="btn btn-sm" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                            <i class="fa-solid fa-ban"></i> Ignore
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr id="no-feedbacks-row" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-comment-slash" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No feedback found matching the selected filter.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 4rem 2rem; text-align: center;">
+            <i class="fa-solid fa-comment-dots" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem; opacity: 0.5;"></i>
+            <h3>No Feedback Submitted Yet</h3>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">When users submit feedback or suggestions, they will appear here.</p>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    function filterFeedbackStatus(status, btn) {
+        const filterBtns = document.querySelectorAll('.fb-filter-btn');
+        filterBtns.forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-secondary)';
+        });
+        btn.style.background = 'var(--accent-indigo)';
+        btn.style.color = 'white';
+
+        const rows = document.querySelectorAll('.feedback-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status');
+            if (status === 'all' || rowStatus === status) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const noResultsRow = document.getElementById('no-feedbacks-row');
+        if (noResultsRow) {
+            noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+        }
+    }
     function openTab(evt, tabId) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");

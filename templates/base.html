@@ -52,18 +52,21 @@
                         <i class="fa-solid fa-bars"></i> &nbsp; {{ user.first_name|default:user.username }}
                     </span>
                     <div class="nav-dropdown-menu">
+                        {% if user.role == 'faculty' or user.role == 'superuser' or user.is_superuser %}
+                            <a href="{% url 'admin_dashboard' %}">
+                                <i class="fa-solid fa-gauge"></i> Admin Dashboard
+                            </a>
+                            <div class="divider"></div>
+                        {% endif %}
                         <a href="{% url 'user_dashboard' %}">
                             <i class="fa-solid fa-clock-rotate-left"></i> Upload Status
+                        </a>
+                        <a href="{% url 'feedback' %}">
+                            <i class="fa-solid fa-comment-dots"></i> Submit Feedback
                         </a>
                         <a href="{% url 'change_password' %}">
                             <i class="fa-solid fa-key"></i> Change Password
                         </a>
-                        {% if user.role == 'faculty' or user.role == 'superuser' or user.is_superuser %}
-                            <div class="divider"></div>
-                            <a href="{% url 'admin_dashboard' %}">
-                                <i class="fa-solid fa-gauge"></i> Admin Dashboard
-                            </a>
-                        {% endif %}
                         <div class="divider"></div>
                         <button type="button" class="theme-toggle-item" onclick="toggleTheme()">
                             <i class="fa-solid fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
