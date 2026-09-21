@@ -16,7 +16,7 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
     def __str__(self):
-        return f"{self.name} ({self.get_target_type_display()})"
+        return self.name
 
 
 class Book(models.Model):

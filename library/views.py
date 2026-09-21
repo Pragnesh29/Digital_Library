@@ -290,6 +290,7 @@ def admin_dashboard_view(request):
     
     is_admin = (user.role == 'superuser' or user.is_superuser)
     all_users = CustomUser.objects.all().order_by('-date_joined') if is_admin else None
+    audit_logs = AuditLog.objects.all() if is_admin else None
     all_books = Book.objects.all().order_by('-created_at')
     all_articles = Article.objects.all().order_by('-created_at')
     all_categories = Category.objects.all().order_by('name')
