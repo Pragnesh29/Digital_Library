@@ -3,8 +3,24 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .forms import UserSignupForm
+from .models import CustomUser
 from library.utils import log_action
+
+def check_username_view(request):
+    username = request.GET.get('username', '').strip()
+    if not username:
+        return JsonResponse({'available': False, 'message': ''})
+    
+    if len(username) < 3:
+        return JsonResponse({'available': False, 'message': 'Username must be at least 3 characters long.'})
+        
+    exists = CustomUser.objects.filter(username__iexact=username).exists()
+    if exists:
+        return JsonResponse({'available': False, 'message': 'Username already taken! Please choose another.'})
+    else:
+        return JsonResponse({'available': True, 'message': 'Username is available!'})
 
 def signup_view(request):
     if request.user.is_authenticated:

@@ -5,7 +5,7 @@
     <h2 class="form-title">Create an Account</h2>
     <p class="form-subtitle">Register to access and contribute to the library. Accounts require admin approval before login.</p>
     
-    <form method="POST">
+    <form method="POST" id="signup-form">
         {% csrf_token %}
         
         {% if form.non_field_errors %}
@@ -27,7 +27,7 @@
             </div>
         {% endfor %}
         
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+        <button type="submit" id="submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
             <i class="fa-solid fa-user-plus"></i> Sign Up
         </button>
     </form>
@@ -36,4 +36,71 @@
         Already have an account? <a href="{% url 'login' %}">Login here</a>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const usernameInput = document.getElementById("id_username");
+    const submitBtn = document.getElementById("submit-btn");
+    if (!usernameInput) return;
+
+    // Create a feedback message container under username input
+    const feedback = document.createElement("div");
+    feedback.id = "username-feedback";
+    feedback.style.fontSize = "0.85rem";
+    feedback.style.marginTop = "0.35rem";
+    feedback.style.fontWeight = "600";
+    feedback.style.display = "flex";
+    feedback.style.alignItems = "center";
+    feedback.style.gap = "0.4rem";
+    usernameInput.parentNode.appendChild(feedback);
+
+    let debounceTimer;
+
+    usernameInput.addEventListener("input", function () {
+        clearTimeout(debounceTimer);
+        const username = this.value.trim();
+
+        if (username.length === 0) {
+            feedback.innerHTML = "";
+            usernameInput.style.borderColor = "";
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+        }
+
+        if (username.length < 3) {
+            feedback.style.color = "#f87171"; // Soft red
+            feedback.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Username must be at least 3 characters long.';
+            usernameInput.style.borderColor = "#f87171";
+            if (submitBtn) submitBtn.disabled = true;
+            return;
+        }
+
+        feedback.style.color = "#a78bfa"; // Soft purple loader
+        feedback.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking availability...';
+
+        debounceTimer = setTimeout(() => {
+            fetch(`{% url 'check_username' %}?username=${encodeURIComponent(username)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        feedback.style.color = "#4ade80"; // Bright green
+                        feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${data.message}`;
+                        usernameInput.style.borderColor = "#4ade80";
+                        if (submitBtn) submitBtn.disabled = false;
+                    } else {
+                        feedback.style.color = "#f87171"; // Bright red warning
+                        feedback.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${data.message}`;
+                        usernameInput.style.borderColor = "#f87171";
+                        if (submitBtn) submitBtn.disabled = true;
+                    }
+                })
+                .catch(() => {
+                    feedback.innerHTML = "";
+                    usernameInput.style.borderColor = "";
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+        }, 300);
+    });
+});
+</script>
 {% endblock %}
