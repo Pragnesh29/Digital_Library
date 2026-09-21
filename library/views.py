@@ -715,6 +715,29 @@ def toggle_highlight_view(request, content_type, pk):
     return redirect_to_admin_dashboard(request, 'highlights-tab')
 
 @login_required
+def clear_all_highlights_view(request):
+    user = request.user
+    if not (user.role in ['faculty', 'superuser'] or user.is_superuser):
+        messages.error(request, "Access Denied.")
+        return redirect('home')
+        
+    if request.method == 'POST':
+        highlighted_books_count = Book.objects.filter(is_highlighted=True).count()
+        highlighted_articles_count = Article.objects.filter(is_highlighted=True).count()
+        total_cleared = highlighted_books_count + highlighted_articles_count
+
+        Book.objects.filter(is_highlighted=True).update(is_highlighted=False)
+        Article.objects.filter(is_highlighted=True).update(is_highlighted=False)
+
+        if total_cleared > 0:
+            messages.success(request, f"Successfully cleared highlights from {highlighted_books_count} book(s) and {highlighted_articles_count} article(s).")
+            log_action(user, "All Highlights Cleared", f"Cleared highlights from {highlighted_books_count} books and {highlighted_articles_count} articles")
+        else:
+            messages.info(request, "There are currently no highlighted books or articles to clear.")
+            
+    return redirect_to_admin_dashboard(request, 'highlights-tab')
+
+@login_required
 def delete_book_view(request, book_id):
     user = request.user
     if not (user.role in ['faculty', 'superuser'] or user.is_superuser):

@@ -542,6 +542,26 @@
 
 <!-- Highlight Manager Tab -->
 <div id="highlights-tab" class="tab-content">
+    <!-- Header Bar with Clear All Action -->
+    <div class="glass" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="font-size: 1.15rem; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-star" style="color: var(--accent-indigo);"></i> Highlight Manager
+            </h3>
+            <p style="font-size: 0.83rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                Feature or unfeature books and articles on the home page showcase.
+            </p>
+        </div>
+        <div>
+            <form method="POST" action="{% url 'clear_all_highlights' %}" onsubmit="return confirm('Are you sure you want to clear highlights from ALL books and articles?');" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);">
+                    <i class="fa-solid fa-broom"></i> Clear All Highlights
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="highlight-manager-grid">
         
         <!-- Books Highlight List -->

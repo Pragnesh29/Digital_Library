@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin-dashboard/approve-book/<int:book_id>/', views.approve_book_view, name='approve_book'),
     path('admin-dashboard/approve-article/<int:article_id>/', views.approve_article_view, name='approve_article'),
     path('admin-dashboard/toggle-highlight/<str:content_type>/<int:pk>/', views.toggle_highlight_view, name='toggle_highlight'),
+    path('admin-dashboard/clear-all-highlights/', views.clear_all_highlights_view, name='clear_all_highlights'),
     path('admin-dashboard/delete-book/<int:book_id>/', views.delete_book_view, name='delete_book'),
     path('admin-dashboard/delete-article/<int:article_id>/', views.delete_article_view, name='delete_article'),
     path('admin-dashboard/reset-user-password/<int:user_id>/', views.reset_user_password_view, name='reset_user_password'),
