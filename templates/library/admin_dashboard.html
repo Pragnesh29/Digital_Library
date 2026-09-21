@@ -44,14 +44,7 @@
     <button class="tab-btn" id="btn-articles-tab" onclick="openTab(event, 'articles-tab')">
         <i class="fa-solid fa-folder-plus"></i> Pending Articles ({{ pending_articles.count }})
     </button>
-    {% if user.role == 'superuser' or user.is_superuser %}
-        <button class="tab-btn" id="btn-departments-tab" onclick="openTab(event, 'departments-tab')">
-            <i class="fa-solid fa-building-user"></i> Departments ({{ all_departments.count }})
-        </button>
-        <button class="tab-btn" id="btn-groups-tab" onclick="openTab(event, 'groups-tab')">
-            <i class="fa-solid fa-people-group"></i> Groups ({{ all_groups.count }})
-        </button>
-    {% endif %}
+
     <button class="tab-btn" id="btn-categories-tab" onclick="openTab(event, 'categories-tab')">
         <i class="fa-solid fa-tags"></i> Categories ({{ all_categories.count }})
     </button>
@@ -404,141 +397,7 @@
     {% endif %}
 </div>
 
-{% if user.role == 'superuser' or user.is_superuser %}
-<!-- Department Management Tab -->
-<div id="departments-tab" class="tab-content">
-    <!-- Add Department Form -->
-    <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);">
-            <i class="fa-solid fa-plus-circle" style="color: var(--accent-indigo);"></i> Add New Department / Division
-        </h3>
-        <form method="POST" action="{% url 'manage_departments' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="add">
-            <div style="flex: 2; min-width: 240px;">
-                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Department Name</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g. Civil Engineering, Computer Science, Mechanical" required>
-            </div>
-            <div>
-                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
-                    <i class="fa-solid fa-check"></i> Add Department
-                </button>
-            </div>
-        </form>
-    </div>
 
-    <!-- Departments List Table -->
-    {% if all_departments %}
-        <div class="glass table-container" style="padding: 1rem;">
-            <table class="dashboard-table">
-                <thead>
-                    <tr>
-                        <th>Department Name</th>
-                        <th>Associated Users</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for dept in all_departments %}
-                        <tr>
-                            <td><strong>{{ dept.name }}</strong></td>
-                            <td>
-                                <span class="nav-user-badge" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border-color: rgba(99, 102, 241, 0.3);">
-                                    <i class="fa-solid fa-users"></i> {{ dept.users.count }} Users
-                                </span>
-                            </td>
-                            <td style="white-space: nowrap;">
-                                <button type="button" class="btn btn-secondary btn-sm" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; box-shadow: none; margin-right: 0.35rem;" onclick="openEditDepartmentModal({{ dept.pk }}, '{{ dept.name|escapejs }}')">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                                </button>
-                                <form method="POST" action="{% url 'manage_departments' %}" onsubmit="return confirm('Are you sure you want to delete department \'{{ dept.name|escapejs }}\'?');" style="display: inline;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="department_id" value="{{ dept.pk }}">
-                                    <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
-                                        <i class="fa-solid fa-trash-can"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="glass" style="padding: 3rem; text-align: center;">
-            <p style="color: var(--text-secondary);">No departments created yet.</p>
-        </div>
-    {% endif %}
-</div>
-
-<!-- Group Management Tab -->
-<div id="groups-tab" class="tab-content">
-    <!-- Add Group Form -->
-    <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);">
-            <i class="fa-solid fa-plus-circle" style="color: var(--accent-indigo);"></i> Add New Research / Target Group
-        </h3>
-        <form method="POST" action="{% url 'manage_groups' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="add">
-            <div style="flex: 2; min-width: 240px;">
-                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Group Name</label>
-                <input type="text" name="name" class="form-control" placeholder="e.g. Undergraduates, Faculty Researchers, Defense Officers" required>
-            </div>
-            <div>
-                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
-                    <i class="fa-solid fa-check"></i> Add Group
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Groups List Table -->
-    {% if all_groups %}
-        <div class="glass table-container" style="padding: 1rem;">
-            <table class="dashboard-table">
-                <thead>
-                    <tr>
-                        <th>Group Name</th>
-                        <th>Associated Users</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for grp in all_groups %}
-                        <tr>
-                            <td><strong>{{ grp.name }}</strong></td>
-                            <td>
-                                <span class="nav-user-badge" style="background: rgba(139, 92, 246, 0.15); color: #c084fc; border-color: rgba(139, 92, 246, 0.3);">
-                                    <i class="fa-solid fa-users"></i> {{ grp.users.count }} Users
-                                </span>
-                            </td>
-                            <td style="white-space: nowrap;">
-                                <button type="button" class="btn btn-secondary btn-sm" style="background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; box-shadow: none; margin-right: 0.35rem;" onclick="openEditGroupModal({{ grp.pk }}, '{{ grp.name|escapejs }}')">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                                </button>
-                                <form method="POST" action="{% url 'manage_groups' %}" onsubmit="return confirm('Are you sure you want to delete group \'{{ grp.name|escapejs }}\'?');" style="display: inline;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="group_id" value="{{ grp.pk }}">
-                                    <button type="submit" class="btn btn-danger btn-sm" style="box-shadow: none;">
-                                        <i class="fa-solid fa-trash-can"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="glass" style="padding: 3rem; text-align: center;">
-            <p style="color: var(--text-secondary);">No groups created yet.</p>
-        </div>
-    {% endif %}
-</div>
-{% endif %}
 
 <!-- Highlight Manager Tab -->
 <div id="highlights-tab" class="tab-content">
@@ -1122,63 +981,7 @@
     </div>
 </div>
 
-<!-- Edit Department Modal -->
-<div id="editDepartmentModal" class="modal-overlay" onclick="if(event.target === this) closeEditDepartmentModal();" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem;">
-    <div class="glass modal-content" style="max-width: 480px; width: 100%; border-radius: 16px; border: 1px solid rgba(99, 102, 241, 0.35); background: rgba(18, 18, 28, 0.95); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 25px rgba(99, 102, 241, 0.15); padding: 1.75rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-            <h3 style="font-size: 1.15rem; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-pen-to-square" style="color: var(--accent-indigo);"></i> Edit Department / Division
-            </h3>
-            <button type="button" onclick="closeEditDepartmentModal()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.background='rgba(255,255,255,0.05)';">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <form method="POST" action="{% url 'manage_departments' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="department_id" id="edit-dept-id">
-            <div style="margin-bottom: 1.25rem;">
-                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Department Name <span style="color: #ef4444;">*</span></label>
-                <input type="text" name="name" id="edit-dept-name" class="form-control" required placeholder="Enter department name">
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeEditDepartmentModal()" style="padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.88rem;">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.4rem; border-radius: 8px; font-size: 0.88rem;">
-                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
-<!-- Edit Group Modal -->
-<div id="editGroupModal" class="modal-overlay" onclick="if(event.target === this) closeEditGroupModal();" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem;">
-    <div class="glass modal-content" style="max-width: 480px; width: 100%; border-radius: 16px; border: 1px solid rgba(139, 92, 246, 0.35); background: rgba(18, 18, 28, 0.95); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 25px rgba(139, 92, 246, 0.15); padding: 1.75rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-            <h3 style="font-size: 1.15rem; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fa-solid fa-pen-to-square" style="color: var(--accent-violet);"></i> Edit Research / Target Group
-            </h3>
-            <button type="button" onclick="closeEditGroupModal()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.color='var(--text-primary)'; this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.color='var(--text-secondary)'; this.style.background='rgba(255,255,255,0.05)';">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <form method="POST" action="{% url 'manage_groups' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="edit">
-            <input type="hidden" name="group_id" id="edit-group-id">
-            <div style="margin-bottom: 1.25rem;">
-                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Group Name <span style="color: #ef4444;">*</span></label>
-                <input type="text" name="name" id="edit-group-name" class="form-control" required placeholder="Enter group name">
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-                <button type="button" class="btn btn-secondary" onclick="closeEditGroupModal()" style="padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.88rem;">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.4rem; border-radius: 8px; font-size: 0.88rem;">
-                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- Edit Category Modal -->
 <div id="editCategoryModal" class="modal-overlay" onclick="if(event.target === this) closeEditCategoryModal();" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 1rem;">
@@ -1281,37 +1084,9 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeRejectionModal();
-            closeEditDepartmentModal();
-            closeEditGroupModal();
             closeEditCategoryModal();
         }
     });
-
-    function openEditDepartmentModal(id, name) {
-        const idInput = document.getElementById('edit-dept-id');
-        const nameInput = document.getElementById('edit-dept-name');
-        if (idInput) idInput.value = id;
-        if (nameInput) nameInput.value = name;
-        const modal = document.getElementById('editDepartmentModal');
-        if (modal) modal.style.display = 'flex';
-    }
-    function closeEditDepartmentModal() {
-        const modal = document.getElementById('editDepartmentModal');
-        if (modal) modal.style.display = 'none';
-    }
-
-    function openEditGroupModal(id, name) {
-        const idInput = document.getElementById('edit-group-id');
-        const nameInput = document.getElementById('edit-group-name');
-        if (idInput) idInput.value = id;
-        if (nameInput) nameInput.value = name;
-        const modal = document.getElementById('editGroupModal');
-        if (modal) modal.style.display = 'flex';
-    }
-    function closeEditGroupModal() {
-        const modal = document.getElementById('editGroupModal');
-        if (modal) modal.style.display = 'none';
-    }
 
     function openEditCategoryModal(id, name, targetType) {
         const idInput = document.getElementById('edit-cat-id');
