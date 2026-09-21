@@ -20,6 +20,9 @@
 <!-- Books Tab Content -->
 <div id="books-tab" class="tab-content active">
     {% if books %}
+        <div style="margin-bottom: 1.5rem; max-width: 450px;">
+            <input type="text" id="search-user-book-input" class="form-control" placeholder="Search uploaded books by title...">
+        </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
                 <thead>
@@ -33,7 +36,7 @@
                 </thead>
                 <tbody>
                     {% for book in books %}
-                        <tr>
+                        <tr class="user-book-row">
                             <td>
                                 <strong>{{ book.title }}</strong>
                                 {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
@@ -82,6 +85,12 @@
                             </td>
                         </tr>
                     {% endfor %}
+                    <tr id="no-user-books-row" style="display: none;">
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; display: block;"></i>
+                            <p>No matching uploaded books found.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -96,6 +105,9 @@
 <!-- Articles Tab Content -->
 <div id="articles-tab" class="tab-content">
     {% if articles %}
+        <div style="margin-bottom: 1.5rem; max-width: 450px;">
+            <input type="text" id="search-user-article-input" class="form-control" placeholder="Search uploaded articles by title...">
+        </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
                 <thead>
@@ -109,7 +121,7 @@
                 </thead>
                 <tbody>
                     {% for article in articles %}
-                        <tr>
+                        <tr class="user-article-row">
                             <td><strong>{{ article.title }}</strong></td>
                             <td>{{ article.images.count }} photos</td>
                             <td>{{ article.created_at|date:"M d, Y, h:i A" }}</td>
@@ -153,6 +165,12 @@
                             </td>
                         </tr>
                     {% endfor %}
+                    <tr id="no-user-articles-row" style="display: none;">
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; display: block;"></i>
+                            <p>No matching uploaded articles found.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -187,5 +205,36 @@
         document.getElementById(tabId).classList.add("active");
         evt.currentTarget.classList.add("active");
     }
+
+    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        input.addEventListener('input', function() {
+            const filterValue = input.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.' + rowClassName);
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(filterValue)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            const noResultsRow = document.getElementById(noResultsRowId);
+            if (noResultsRow) {
+                noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        setupInstantTableFilter('search-user-book-input', 'user-book-row', 'no-user-books-row');
+        setupInstantTableFilter('search-user-article-input', 'user-article-row', 'no-user-articles-row');
+    });
 </script>
 {% endblock %}
