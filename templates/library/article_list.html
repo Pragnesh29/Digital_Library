@@ -35,11 +35,11 @@
                 <div class="article-meta">
                     {% if article.show_uploader %}
                         <span>
-                            <i class="fa-solid fa-user"></i> {{ article.uploaded_by.first_name|default:article.uploaded_by.username }}
+                            <i class="fa-solid fa-user"></i> {{ article.uploaded_by.username }}
                         </span>
                     {% elif user.is_staff or user.role == 'admin' or user.role == 'faculty' %}
                         <span>
-                            <i class="fa-solid fa-user"></i> {{ article.uploaded_by.first_name|default:article.uploaded_by.username }} <small style="color: var(--text-secondary);">(Hidden)</small>
+                            <i class="fa-solid fa-user"></i> {{ article.uploaded_by.username }} <small style="color: var(--text-secondary);">(Hidden)</small>
                         </span>
                     {% endif %}
                     <span>

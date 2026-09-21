@@ -16,9 +16,9 @@
     
     <div class="detail-meta-row" style="margin-bottom: 2.5rem;">
         {% if article.show_uploader %}
-            <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</strong></span>
+            <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ article.uploaded_by.username }}</strong></span>
         {% elif user.is_staff or user.role == 'admin' or user.role == 'faculty' %}
-            <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</strong> <small style="color: var(--text-secondary);">(Hidden Publicly)</small></span>
+            <span><i class="fa-solid fa-user" style="color: var(--accent-indigo); margin-right: 0.25rem;"></i> Uploaded by: <strong>{{ article.uploaded_by.username }}</strong> <small style="color: var(--text-secondary);">(Hidden Publicly)</small></span>
         {% endif %}
         <span><i class="fa-solid fa-calendar-days" style="color: var(--accent-violet); margin-right: 0.25rem;"></i> Added on: <strong>{{ article.created_at|date:"M d, Y" }}</strong></span>
         <span><i class="fa-solid fa-images" style="color: var(--success); margin-right: 0.25rem;"></i> Total Photos: <strong>{{ article.images.count }}</strong></span>
