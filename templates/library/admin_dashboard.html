@@ -631,6 +631,7 @@
             <option value="user">User & Password Actions</option>
             <option value="book">Book Actions</option>
             <option value="article">Article Actions</option>
+            <option value="feedback">Feedback Actions</option>
         </select>
     </div>
 
@@ -647,7 +648,7 @@
             <tbody id="logs-table-body">
                 {% if audit_logs %}
                     {% for log in audit_logs %}
-                        <tr class="log-row" data-type="{% if 'user' in log.action|lower or 'password' in log.action|lower or 'registration' in log.action|lower %}user{% elif 'book' in log.action|lower %}book{% elif 'article' in log.action|lower %}article{% else %}other{% endif %}">
+                        <tr class="log-row" data-type="{% if 'feedback' in log.action|lower %}feedback{% elif 'user' in log.action|lower or 'password' in log.action|lower or 'registration' in log.action|lower %}user{% elif 'book' in log.action|lower %}book{% elif 'article' in log.action|lower %}article{% else %}other{% endif %}">
                             <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
                             <td><strong>{{ log.user.username|default:"System / Guest" }}</strong></td>
                             <td>
