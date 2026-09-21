@@ -68,7 +68,7 @@ class BookUploadForm(forms.ModelForm):
 class ArticleUploadForm(forms.ModelForm):
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
-        required=False,
+        required=True,
         empty_label="-- Select Category --",
         label="Article Category"
     )
