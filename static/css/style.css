@@ -1089,3 +1089,123 @@ footer {
     background: var(--border-glass);
     margin: 0.4rem 0;
 }
+
+/* ==========================================
+   COMPREHENSIVE LIGHT MODE OVERRIDES (CASCADE WINNER)
+   ========================================== */
+html[data-theme="light"] body {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .hero-content h1,
+html[data-theme="light"] .catalog-title h2,
+html[data-theme="light"] .form-title {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #3730a3 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .nav-brand-title {
+    background: linear-gradient(135deg, #1e1b4b, #3730a3, #4338ca) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+html[data-theme="light"] .nav-user-badge {
+    background: #e0e7ff !important;
+    border-color: #818cf8 !important;
+    color: #1e1b4b !important;
+    font-weight: 700 !important;
+}
+
+html[data-theme="light"] .nav-user-badge i {
+    color: #3730a3 !important;
+}
+
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] h4,
+html[data-theme="light"] h5,
+html[data-theme="light"] h6 {
+    color: #0f172a;
+}
+
+html[data-theme="light"] p,
+html[data-theme="light"] label {
+    color: #334155;
+}
+
+html[data-theme="light"] .nav-links a {
+    color: #334155 !important;
+}
+
+html[data-theme="light"] .nav-links a:hover,
+html[data-theme="light"] .nav-links a.active {
+    color: #4338ca !important;
+}
+
+html[data-theme="light"] .btn-secondary {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .btn-secondary:hover {
+    background: #e2e8f0 !important;
+    color: #000000 !important;
+}
+
+html[data-theme="light"] table.dashboard-table th {
+    background: #f1f5f9 !important;
+    color: #334155 !important;
+    border-bottom-color: #cbd5e1 !important;
+}
+
+html[data-theme="light"] table.dashboard-table td {
+    color: #0f172a !important;
+    border-bottom-color: #e2e8f0 !important;
+}
+
+html[data-theme="light"] .tab-btn {
+    color: #64748b !important;
+}
+
+html[data-theme="light"] .tab-btn:hover {
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .tab-btn.active {
+    color: #4338ca !important;
+    border-bottom: 2px solid #4338ca !important;
+}
+
+html[data-theme="light"] .nav-dropdown-menu {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15) !important;
+}
+
+html[data-theme="light"] .nav-dropdown-menu a,
+html[data-theme="light"] .nav-dropdown-menu .theme-toggle-item {
+    color: #1e293b !important;
+}
+
+html[data-theme="light"] .nav-dropdown-menu a:hover,
+html[data-theme="light"] .nav-dropdown-menu .theme-toggle-item:hover {
+    background: #f1f5f9 !important;
+    color: #4338ca !important;
+}
+
+html[data-theme="light"] .form-control {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+html[data-theme="light"] .form-control:focus {
+    border-color: #4338ca !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
