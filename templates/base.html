@@ -23,7 +23,6 @@
             <img src="/media/image/cme_logo.jpeg" alt="Organization Logo" class="nav-logo-img org-logo" onerror="this.src='{% static 'images/cme_logo.jpeg' %}'">
             <div class="brand-divider"></div>
             <span class="nav-brand-title">Sarvatra GyanKosh</span>
-            <img src="/media/image/gyankosh_logo.png" alt="Portal Logo" class="nav-logo-img portal-logo" onerror="this.src='{% static 'images/gyankosh_logo.png' %}'">
         </a>
         
         <div class="nav-links">
@@ -97,13 +96,7 @@
 
     <!-- Footer -->
     <footer>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.6rem;">
-            <img src="/media/image/cme_logo.jpeg" alt="Organization Logo" style="height: 28px; width: 28px; border-radius: 50%; object-fit: contain; background: white; padding: 1px;" onerror="this.src='{% static 'images/cme_logo.jpeg' %}'">
-            <span style="color: rgba(255,255,255,0.25);">|</span>
-            <strong style="color: var(--text-primary); font-size: 1rem; font-family: 'Outfit', sans-serif;">Sarvatra GyanKosh</strong>
-            <img src="/media/image/gyankosh_logo.png" alt="Portal Logo" style="height: 30px; object-fit: contain;" onerror="this.src='{% static 'images/gyankosh_logo.png' %}'">
-        </div>
-        <p>&copy; {% now "Y" %} Sarvatra GyanKosh. Built with Django and modern design. All rights reserved.</p>
+        <p>&copy; {% now "Y" %} Sarvatra GyanKosh. All rights reserved.</p>
     </footer>
 
     {% block extra_js %}{% endblock %}
