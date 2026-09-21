@@ -131,3 +131,8 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Session Inactivity & Auto-Logout Settings (15 minutes)
+SESSION_COOKIE_AGE = 900  # 15 minutes (in seconds)
+SESSION_SAVE_EVERY_REQUEST = True  # Extends session expiry on every user request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

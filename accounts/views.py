@@ -82,8 +82,12 @@ def login_view(request):
     return render(request, 'accounts/login.html', {'form': form})
 
 def logout_view(request):
+    reason = request.GET.get('reason')
     logout(request)
-    messages.info(request, "You have successfully logged out.")
+    if reason == 'inactivity':
+        messages.warning(request, "You have been automatically logged out due to 15 minutes of inactivity for security reasons.")
+    else:
+        messages.info(request, "You have successfully logged out.")
     return redirect('login')
 
 def pending_approval_view(request):
