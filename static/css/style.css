@@ -1557,3 +1557,19 @@ html[data-theme="light"] .form-control:focus {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+/* ==========================================
+   HIGHLIGHT MANAGER RESPONSIVE GRID
+   ========================================== */
+.highlight-manager-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .highlight-manager-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+}

@@ -85,7 +85,7 @@ def logout_view(request):
     reason = request.GET.get('reason')
     logout(request)
     if reason == 'inactivity':
-        messages.warning(request, "You have been automatically logged out due to 15 minutes of inactivity for security reasons.")
+        messages.warning(request, "Session timed out. Please log in again.")
     else:
         messages.info(request, "You have successfully logged out.")
     return redirect('login')

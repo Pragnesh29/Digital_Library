@@ -531,7 +531,7 @@
 
 <!-- Highlight Manager Tab -->
 <div id="highlights-tab" class="tab-content">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div class="highlight-manager-grid">
         
         <!-- Books Highlight List -->
         <div>
@@ -546,18 +546,18 @@
 
             {% if approved_books %}
                 <div class="glass table-container" style="padding: 1rem;">
-                    <table class="dashboard-table" style="font-size: 0.85rem;">
+                    <table class="dashboard-table" style="font-size: 0.85rem; width: 100%;">
                         <thead>
                             <tr>
-                                <th>Title</th>
-                                <th style="text-align: right;">Highlight</th>
+                                <th style="width: 70%;">Title</th>
+                                <th style="width: 30%; text-align: right;">Highlight</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for book in approved_books %}
                                 <tr class="hl-book-row">
-                                    <td><strong>{{ book.title }}</strong></td>
-                                    <td style="text-align: right;">
+                                    <td style="word-break: break-word; vertical-align: middle;"><strong>{{ book.title }}</strong></td>
+                                    <td style="text-align: right; vertical-align: middle; white-space: nowrap;">
                                         <form method="POST" action="{% url 'toggle_highlight' 'book' book.pk %}" style="display: inline-block;">
                                             {% csrf_token %}
                                             {% if book.is_highlighted %}
@@ -600,18 +600,18 @@
 
             {% if approved_articles %}
                 <div class="glass table-container" style="padding: 1rem;">
-                    <table class="dashboard-table" style="font-size: 0.85rem;">
+                    <table class="dashboard-table" style="font-size: 0.85rem; width: 100%;">
                         <thead>
                             <tr>
-                                <th>Title</th>
-                                <th style="text-align: right;">Highlight</th>
+                                <th style="width: 70%;">Title</th>
+                                <th style="width: 30%; text-align: right;">Highlight</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for article in approved_articles %}
                                 <tr class="hl-article-row">
-                                    <td><strong>{{ article.title }}</strong></td>
-                                    <td style="text-align: right;">
+                                    <td style="word-break: break-word; vertical-align: middle;"><strong>{{ article.title }}</strong></td>
+                                    <td style="text-align: right; vertical-align: middle; white-space: nowrap;">
                                         <form method="POST" action="{% url 'toggle_highlight' 'article' article.pk %}" style="display: inline-block;">
                                             {% csrf_token %}
                                             {% if article.is_highlighted %}

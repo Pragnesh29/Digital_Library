@@ -20,7 +20,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=19.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20.0">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -335,10 +335,10 @@
     <div id="inactivity-warning-banner" style="display: none; position: fixed; top: 75px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 550px; width: 90%; padding: 1rem 1.5rem; background: rgba(239, 68, 68, 0.95); color: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); text-align: center; font-weight: 600; font-size: 0.95rem; backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); animation: fadeIn 0.3s ease;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 0.6rem;">
             <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.3rem;"></i>
-            <span>Inactivity Warning: Auto-logout in <span id="inactivity-countdown" style="font-size: 1.15rem; font-weight: 800; background: rgba(0,0,0,0.25); padding: 0.1rem 0.5rem; border-radius: 6px;">60</span>s due to 15m inactivity.</span>
+            <span>Session Expiring: Auto-logout in <span id="inactivity-countdown" style="font-size: 1.15rem; font-weight: 800; background: rgba(0,0,0,0.25); padding: 0.1rem 0.5rem; border-radius: 6px;">60</span>s.</span>
         </div>
         <div style="font-size: 0.8rem; font-weight: 400; opacity: 0.9; margin-top: 0.4rem;">
-            Move mouse, click, or press any key to extend your session.
+            Move mouse, click, or press any key to stay logged in.
         </div>
     </div>
 
