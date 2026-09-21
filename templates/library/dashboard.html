@@ -20,8 +20,14 @@
 <!-- Books Tab Content -->
 <div id="books-tab" class="tab-content active">
     {% if books %}
-        <div style="margin-bottom: 1.5rem; max-width: 450px;">
-            <input type="text" id="search-user-book-input" class="form-control" placeholder="Search uploaded books by title...">
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 600px;">
+            <select id="filter-user-book-select" class="form-control" style="width: auto; min-width: 130px;">
+                <option value="all">All Fields</option>
+                <option value="title">Title</option>
+                <option value="category">Category</option>
+                <option value="status">Status</option>
+            </select>
+            <input type="text" id="search-user-book-input" class="form-control" placeholder="Search uploaded books..." style="flex: 1;">
         </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
@@ -37,15 +43,15 @@
                 <tbody>
                     {% for book in books %}
                         <tr class="user-book-row">
-                            <td>
+                            <td data-col="title">
                                 <strong>{{ book.title }}</strong>
                                 {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
                                     <span style="font-size: 0.75rem; color: var(--danger); margin-left: 0.5rem;"><i class="fa-solid fa-lock"></i> Restricted</span>
                                 {% endif %}
                             </td>
-                            <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99, 102, 241, 0.1);">{{ book.category_tag }}</span></td>
+                            <td data-col="category"><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99, 102, 241, 0.1);">{{ book.category_tag }}</span></td>
                             <td>{{ book.created_at|date:"M d, Y, h:i A" }}</td>
-                            <td>
+                            <td data-col="status">
                                 {% if book.status == 'approved' or book.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                 {% elif book.status == 'rejected' %}
@@ -106,8 +112,13 @@
 <!-- Articles Tab Content -->
 <div id="articles-tab" class="tab-content">
     {% if articles %}
-        <div style="margin-bottom: 1.5rem; max-width: 450px;">
-            <input type="text" id="search-user-article-input" class="form-control" placeholder="Search uploaded articles by title...">
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 600px;">
+            <select id="filter-user-article-select" class="form-control" style="width: auto; min-width: 130px;">
+                <option value="all">All Fields</option>
+                <option value="title">Title</option>
+                <option value="status">Status</option>
+            </select>
+            <input type="text" id="search-user-article-input" class="form-control" placeholder="Search uploaded articles..." style="flex: 1;">
         </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
@@ -123,10 +134,10 @@
                 <tbody>
                     {% for article in articles %}
                         <tr class="user-article-row">
-                            <td><strong>{{ article.title }}</strong></td>
+                            <td data-col="title"><strong>{{ article.title }}</strong></td>
                             <td>{{ article.images.count }} photos</td>
                             <td>{{ article.created_at|date:"M d, Y, h:i A" }}</td>
-                            <td>
+                            <td data-col="status">
                                 {% if article.status == 'approved' or article.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                 {% elif article.status == 'rejected' %}
@@ -201,18 +212,43 @@
         evt.currentTarget.classList.add("active");
     }
 
-    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId, paginator) {
+    function setupInstantTableFilter(inputId, selectIdOrRowClass, rowClassOrNoResults, noResultsOrPag, paginator) {
+        let selectId = null;
+        let rowClassName = '';
+        let noResultsRowId = '';
+        let pag = null;
+
+        if (typeof selectIdOrRowClass === 'string' && document.getElementById(selectIdOrRowClass)) {
+            selectId = selectIdOrRowClass;
+            rowClassName = rowClassOrNoResults;
+            noResultsRowId = noResultsOrPag;
+            pag = paginator;
+        } else {
+            rowClassName = selectIdOrRowClass;
+            noResultsRowId = rowClassOrNoResults;
+            pag = noResultsOrPag;
+        }
+
         const input = document.getElementById(inputId);
+        const select = selectId ? document.getElementById(selectId) : null;
         if (!input) return;
 
-        input.addEventListener('input', function() {
+        function applyFilter() {
             const filterValue = input.value.toLowerCase().trim();
+            const colKey = select ? select.value : 'all';
             const rows = document.querySelectorAll('.' + rowClassName);
             let visibleCount = 0;
 
             rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(filterValue)) {
+                let textToSearch = '';
+                if (colKey === 'all') {
+                    textToSearch = row.textContent.toLowerCase();
+                } else {
+                    const cell = row.querySelector(`[data-col="${colKey}"]`);
+                    textToSearch = cell ? cell.textContent.toLowerCase() : row.textContent.toLowerCase();
+                }
+
+                if (!filterValue || textToSearch.includes(filterValue)) {
                     row.dataset.filteredOut = 'false';
                     visibleCount++;
                 } else {
@@ -225,16 +261,21 @@
                 noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
             }
 
-            if (paginator) paginator.reset();
-        });
+            if (pag) pag.reset();
+        }
+
+        input.addEventListener('input', applyFilter);
+        if (select) {
+            select.addEventListener('change', applyFilter);
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         const userBooksPag = createPaginator({ itemSelector: '.user-book-row', paginationContainerId: 'user-books-pagination', pageSize: 30 });
         const userArticlesPag = createPaginator({ itemSelector: '.user-article-row', paginationContainerId: 'user-articles-pagination', pageSize: 30 });
 
-        setupInstantTableFilter('search-user-book-input', 'user-book-row', 'no-user-books-row', userBooksPag);
-        setupInstantTableFilter('search-user-article-input', 'user-article-row', 'no-user-articles-row', userArticlesPag);
+        setupInstantTableFilter('search-user-book-input', 'filter-user-book-select', 'user-book-row', 'no-user-books-row', userBooksPag);
+        setupInstantTableFilter('search-user-article-input', 'filter-user-article-select', 'user-article-row', 'no-user-articles-row', userArticlesPag);
     });
 </script>
 {% endblock %}

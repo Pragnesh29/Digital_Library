@@ -77,8 +77,16 @@
 <!-- Pending Users Tab -->
 <div id="users-tab" class="tab-content active">
     {% if pending_users %}
-        <div style="margin-bottom: 1.5rem; max-width: 500px;">
-            <input type="text" id="search-pending-user-input" class="form-control" placeholder="Search pending users by name, email, department...">
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+            <select id="filter-pending-user-select" class="form-control" style="width: auto; min-width: 140px;">
+                <option value="all">All Fields</option>
+                <option value="username">Username</option>
+                <option value="fullname">Full Name</option>
+                <option value="email">Email / Contact</option>
+                <option value="dept">Dept / Group</option>
+                <option value="role">Role</option>
+            </select>
+            <input type="text" id="search-pending-user-input" class="form-control" placeholder="Search pending users..." style="flex: 1;">
         </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
@@ -95,17 +103,17 @@
                 <tbody>
                     {% for p_user in pending_users %}
                         <tr class="pending-user-row">
-                            <td><strong>{{ p_user.username }}</strong></td>
-                            <td>{{ p_user.first_name }}</td>
-                            <td>
+                            <td data-col="username"><strong>{{ p_user.username }}</strong></td>
+                            <td data-col="fullname">{{ p_user.first_name }}</td>
+                            <td data-col="email">
                                 {{ p_user.email }}<br>
                                 <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ p_user.contact_no }}</span>
                             </td>
-                            <td>
+                            <td data-col="dept">
                                 {{ p_user.department.name|default:"-" }}<br>
                                 <span style="font-size: 0.85rem; color: var(--text-secondary);">Group: {{ p_user.group.name|default:"-" }}</span>
                             </td>
-                            <td>
+                            <td data-col="role">
                                 <span class="nav-user-badge" style="background: rgba(139, 92, 246, 0.15); border-color: rgba(139, 92, 246, 0.3); color: #c084fc;">
                                     {{ p_user.get_role_display }}
                                 </span>
@@ -150,8 +158,14 @@
 <!-- Pending Books Tab -->
 <div id="books-tab" class="tab-content">
     {% if pending_books %}
-        <div style="margin-bottom: 1.5rem; max-width: 500px;">
-            <input type="text" id="search-pending-book-input" class="form-control" placeholder="Search pending books by title, category, uploader...">
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+            <select id="filter-pending-book-select" class="form-control" style="width: auto; min-width: 140px;">
+                <option value="all">All Fields</option>
+                <option value="title">Title</option>
+                <option value="category">Category</option>
+                <option value="uploader">Uploaded By</option>
+            </select>
+            <input type="text" id="search-pending-book-input" class="form-control" placeholder="Search pending books..." style="flex: 1;">
         </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
@@ -168,7 +182,7 @@
                 <tbody>
                     {% for book in pending_books %}
                         <tr class="pending-book-row">
-                            <td>
+                            <td data-col="title">
                                 <strong>{{ book.title }}</strong>
                                 {% if book.description %}
                                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ book.description }}">
@@ -176,8 +190,8 @@
                                     </div>
                                 {% endif %}
                             </td>
-                            <td>{{ book.category_tag }}</td>
-                            <td>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
+                            <td data-col="category">{{ book.category_tag }}</td>
+                            <td data-col="uploader">{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
                             <td>
                                 {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
                                     <span style="font-size: 0.85rem; color: var(--danger); font-weight: 500;">Restricted</span>
@@ -253,8 +267,14 @@
 <!-- Pending Articles Tab -->
 <div id="articles-tab" class="tab-content">
     {% if pending_articles %}
-        <div style="margin-bottom: 1.5rem; max-width: 500px;">
-            <input type="text" id="search-pending-article-input" class="form-control" placeholder="Search pending articles by title, description, uploader...">
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+            <select id="filter-pending-article-select" class="form-control" style="width: auto; min-width: 140px;">
+                <option value="all">All Fields</option>
+                <option value="title">Title</option>
+                <option value="description">Description</option>
+                <option value="uploader">Uploaded By</option>
+            </select>
+            <input type="text" id="search-pending-article-input" class="form-control" placeholder="Search pending articles..." style="flex: 1;">
         </div>
         <div class="glass table-container" style="padding: 1rem;">
             <table class="dashboard-table">
@@ -270,9 +290,9 @@
                 <tbody>
                     {% for article in pending_articles %}
                         <tr class="pending-article-row">
-                            <td><strong>{{ article.title }}</strong></td>
-                            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ article.description }}</td>
-                            <td>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
+                            <td data-col="title"><strong>{{ article.title }}</strong></td>
+                            <td data-col="description" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ article.description }}</td>
+                            <td data-col="uploader">{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
                             <td>
                                 {% if article.images.exists %}
                                     <a href="{% url 'article_detail' article.pk %}" target="_blank" style="color: var(--accent-indigo); font-weight:600;">
@@ -344,11 +364,21 @@
 
 <!-- Category Management Tab -->
 <div id="categories-tab" class="tab-content">
-    <!-- Add Category Form -->
-    <div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
-        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary);">
+    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h3 style="font-size: 1.2rem; color: var(--text-primary); margin: 0;"><i class="fa-solid fa-tags" style="color: var(--accent-indigo); margin-right: 0.5rem;"></i> Category Management</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">Manage book and article categories across the digital library.</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="toggleAddCategoryForm()" style="box-shadow: none; font-size: 0.85rem; padding: 0.5rem 1rem;">
+            <i class="fa-solid fa-plus-circle"></i> + Add New Category
+        </button>
+    </div>
+
+    <!-- Add Category Form (Hidden by Default) -->
+    <div id="add-category-section" class="glass" style="display: none; padding: 1.5rem; margin-bottom: 2rem;">
+        <h4 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-primary);">
             <i class="fa-solid fa-plus-circle" style="color: var(--accent-indigo);"></i> Add New Category
-        </h3>
+        </h4>
         <form method="POST" action="{% url 'manage_categories' %}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
             {% csrf_token %}
             <input type="hidden" name="action" value="add">
@@ -372,6 +402,16 @@
         </form>
     </div>
 
+    <!-- Category Search Bar -->
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+        <select id="filter-category-select" class="form-control" style="width: auto; min-width: 140px;">
+            <option value="all">All Fields</option>
+            <option value="name">Category Name</option>
+            <option value="target">Target Module</option>
+        </select>
+        <input type="text" id="search-category-input" class="form-control" placeholder="Search categories..." style="flex: 1;">
+    </div>
+
     <!-- Categories List Table -->
     {% if all_categories %}
         <div class="glass table-container" style="padding: 1rem;">
@@ -389,8 +429,8 @@
                 <tbody>
                     {% for cat in all_categories %}
                         <tr class="category-row">
-                            <td><strong>{{ cat.name }}</strong></td>
-                            <td>
+                            <td data-col="name"><strong>{{ cat.name }}</strong></td>
+                            <td data-col="target">
                                 {% if cat.target_type == 'both' %}
                                     <span class="nav-user-badge" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border-color: rgba(99, 102, 241, 0.3);">Both (Books & Articles)</span>
                                 {% elif cat.target_type == 'book' %}
@@ -417,6 +457,12 @@
                             </td>
                         </tr>
                     {% endfor %}
+                    <tr id="no-categories-row" style="display: none;">
+                        <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                            <p>No matching categories found.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div id="categories-pagination"></div>
@@ -568,8 +614,17 @@
 <!-- All Users Tab -->
 <div id="all-users-tab" class="tab-content">
     <!-- User Search Form -->
-    <div style="margin-bottom: 1.5rem; max-width: 450px;">
-        <input type="text" id="search-user-input" class="form-control" placeholder="Search users by name, email, or username instantly...">
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+        <select id="filter-user-select" class="form-control" style="width: auto; min-width: 140px;">
+            <option value="all">All Fields</option>
+            <option value="username">Username</option>
+            <option value="fullname">Full Name</option>
+            <option value="email">Email</option>
+            <option value="dept">Dept / Group</option>
+            <option value="role">Role</option>
+            <option value="status">Status</option>
+        </select>
+        <input type="text" id="search-user-input" class="form-control" placeholder="Search users..." style="flex: 1;">
     </div>
 
     <div class="glass table-container" style="padding: 1rem;">
@@ -588,19 +643,19 @@
             <tbody id="users-table-body">
                 {% for sys_user in all_users %}
                     <tr class="user-row">
-                        <td><strong>{{ sys_user.username }}</strong></td>
-                        <td>{{ sys_user.first_name }}</td>
-                        <td>{{ sys_user.email }}</td>
-                        <td>
+                        <td data-col="username"><strong>{{ sys_user.username }}</strong></td>
+                        <td data-col="fullname">{{ sys_user.first_name }}</td>
+                        <td data-col="email">{{ sys_user.email }}</td>
+                        <td data-col="role">
                             <span class="nav-user-badge" style="font-size: 0.8rem; text-transform: uppercase;">
                                 {{ sys_user.get_role_display }}
                             </span>
                         </td>
-                        <td>
+                        <td data-col="dept">
                             {{ sys_user.department.name|default:"-" }}<br>
                             <span style="font-size: 0.8rem; color: var(--text-secondary);">Group: {{ sys_user.group.name|default:"-" }}</span>
                         </td>
-                        <td>
+                        <td data-col="status">
                             {% if sys_user.is_approved %}
                                 <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                             {% else %}
@@ -640,8 +695,15 @@
 <!-- All Books Tab -->
 <div id="all-books-tab" class="tab-content">
     <!-- Book Search Form -->
-    <div style="margin-bottom: 1.5rem; max-width: 450px;">
-        <input type="text" id="search-book-input" class="form-control" placeholder="Search books by title instantly...">
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+        <select id="filter-book-select" class="form-control" style="width: auto; min-width: 140px;">
+            <option value="all">All Fields</option>
+            <option value="title">Title</option>
+            <option value="category">Category</option>
+            <option value="uploader">Uploaded By</option>
+            <option value="status">Status</option>
+        </select>
+        <input type="text" id="search-book-input" class="form-control" placeholder="Search books..." style="flex: 1;">
     </div>
 
     <div class="glass table-container" style="padding: 1rem;">
@@ -659,7 +721,7 @@
                 {% if all_books %}
                     {% for book in all_books %}
                         <tr class="book-row">
-                            <td>
+                            <td data-col="title">
                                 <strong>{{ book.title }}</strong>
                                 {% if book.restricted_to_departments.exists or book.restricted_to_groups.exists %}
                                     <span style="font-size: 0.75rem; color: var(--danger); margin-left: 0.5rem;" title="Visible only to target departments or groups"><i class="fa-solid fa-lock"></i> Restricted</span>
@@ -670,9 +732,9 @@
                                     </div>
                                 {% endif %}
                             </td>
-                            <td><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99,102,241,0.1);">{{ book.category_tag }}</span></td>
-                            <td>{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
-                            <td>
+                            <td data-col="category"><span class="nav-user-badge" style="font-size: 0.75rem; background:rgba(99,102,241,0.1);">{{ book.category_tag }}</span></td>
+                            <td data-col="uploader">{{ book.uploaded_by.first_name|default:book.uploaded_by.username }}</td>
+                            <td data-col="status">
                                 {% if book.status == 'approved' or book.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                 {% elif book.status == 'rejected' %}
@@ -725,8 +787,14 @@
 <!-- All Articles Tab -->
 <div id="all-articles-tab" class="tab-content">
     <!-- Article Search Form -->
-    <div style="margin-bottom: 1.5rem; max-width: 450px;">
-        <input type="text" id="search-article-input" class="form-control" placeholder="Search articles by title instantly...">
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 650px;">
+        <select id="filter-article-select" class="form-control" style="width: auto; min-width: 140px;">
+            <option value="all">All Fields</option>
+            <option value="title">Title</option>
+            <option value="uploader">Uploaded By</option>
+            <option value="status">Status</option>
+        </select>
+        <input type="text" id="search-article-input" class="form-control" placeholder="Search articles..." style="flex: 1;">
     </div>
 
     <div class="glass table-container" style="padding: 1rem;">
@@ -744,10 +812,10 @@
                 {% if all_articles %}
                     {% for article in all_articles %}
                         <tr class="article-row">
-                            <td><strong>{{ article.title }}</strong></td>
-                            <td>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
+                            <td data-col="title"><strong>{{ article.title }}</strong></td>
+                            <td data-col="uploader">{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
                             <td>{{ article.images.count }} photos</td>
-                            <td>
+                            <td data-col="status">
                                 {% if article.status == 'approved' or article.is_approved %}
                                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Approved</span>
                                 {% elif article.status == 'rejected' %}
@@ -859,8 +927,13 @@
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">View and manage user submitted feedback, suggestions, and attached photos/screenshots.</p>
         </div>
         
-        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; flex: 1; max-width: 700px; justify-content: flex-end;">
-            <input type="text" id="search-feedback-input" class="form-control" placeholder="Search feedbacks by user, subject, message..." style="flex: 1; min-width: 250px;">
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; flex: 1; max-width: 750px; justify-content: flex-end;">
+            <select id="filter-feedback-select" class="form-control" style="width: auto; min-width: 120px;">
+                <option value="all">All Fields</option>
+                <option value="user">User / Email</option>
+                <option value="content">Subject / Message</option>
+            </select>
+            <input type="text" id="search-feedback-input" class="form-control" placeholder="Search feedbacks..." style="flex: 1; min-width: 200px;">
             <!-- Feedback Status Filters: All, Pending, Resolved, Ignored -->
             <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.03); padding: 0.35rem; border-radius: 8px; border: 1px solid var(--border-glass);" id="feedback-status-filters">
                 <button type="button" class="btn btn-secondary btn-sm fb-filter-btn active-fb-filter" onclick="filterFeedbackStatus('all', this)" style="font-size: 0.8rem; background: var(--accent-indigo); color: white;">All</button>
@@ -890,11 +963,11 @@
                             <td style="font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap;">
                                 {{ fb.created_at|date:"M d, Y H:i" }}
                             </td>
-                            <td>
+                            <td data-col="user">
                                 <strong>{{ fb.user.username }}</strong><br>
                                 <small style="color: var(--text-secondary);">{{ fb.user.email|default:"No email" }}</small>
                             </td>
-                            <td style="max-width: 320px;">
+                            <td data-col="content" style="max-width: 320px;">
                                 <strong style="color: var(--text-primary); display: block; margin-bottom: 0.35rem;">{{ fb.subject }}</strong>
                                 <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message }}</span>
                             </td>
@@ -1126,6 +1199,13 @@
         }
     });
 
+    function toggleAddCategoryForm() {
+        const sec = document.getElementById('add-category-section');
+        if (sec) {
+            sec.style.display = (sec.style.display === 'none' || sec.style.display === '') ? 'block' : 'none';
+        }
+    }
+
     function openEditCategoryModal(id, name, targetType) {
         const idInput = document.getElementById('edit-cat-id');
         const nameInput = document.getElementById('edit-cat-name');
@@ -1140,33 +1220,7 @@
         const modal = document.getElementById('editCategoryModal');
         if (modal) modal.style.display = 'none';
     }
-    function filterFeedbackStatus(status, btn) {
-        const filterBtns = document.querySelectorAll('.fb-filter-btn');
-        filterBtns.forEach(b => {
-            b.style.background = 'transparent';
-            b.style.color = 'var(--text-secondary)';
-        });
-        btn.style.background = 'var(--accent-indigo)';
-        btn.style.color = 'white';
 
-        const rows = document.querySelectorAll('.feedback-row');
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const rowStatus = row.getAttribute('data-status');
-            if (status === 'all' || rowStatus === status) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        const noResultsRow = document.getElementById('no-feedbacks-row');
-        if (noResultsRow) {
-            noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
-        }
-    }
     function openTab(evt, tabId) {
         var i, tabcontent, tablinks;
         tabcontent = document.getElementsByClassName("tab-content");
@@ -1203,19 +1257,44 @@
         }
     }
 
-    // Instant table-row text filtering function
-    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId, paginator) {
+    // Instant table-row text filtering function (supports optional dropdown filter & data-col)
+    function setupInstantTableFilter(inputId, selectIdOrRowClass, rowClassOrNoResults, noResultsOrPag, paginator) {
+        let selectId = null;
+        let rowClassName = '';
+        let noResultsRowId = '';
+        let pag = null;
+
+        if (typeof selectIdOrRowClass === 'string' && document.getElementById(selectIdOrRowClass)) {
+            selectId = selectIdOrRowClass;
+            rowClassName = rowClassOrNoResults;
+            noResultsRowId = noResultsOrPag;
+            pag = paginator;
+        } else {
+            rowClassName = selectIdOrRowClass;
+            noResultsRowId = rowClassOrNoResults;
+            pag = noResultsOrPag;
+        }
+
         const input = document.getElementById(inputId);
+        const select = selectId ? document.getElementById(selectId) : null;
         if (!input) return;
 
-        input.addEventListener('input', function() {
+        function applyFilter() {
             const filterValue = input.value.toLowerCase().trim();
+            const colKey = select ? select.value : 'all';
             const rows = document.querySelectorAll('.' + rowClassName);
             let visibleCount = 0;
 
             rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(filterValue)) {
+                let textToSearch = '';
+                if (colKey === 'all') {
+                    textToSearch = row.textContent.toLowerCase();
+                } else {
+                    const cell = row.querySelector(`[data-col="${colKey}"]`);
+                    textToSearch = cell ? cell.textContent.toLowerCase() : row.textContent.toLowerCase();
+                }
+
+                if (!filterValue || textToSearch.includes(filterValue)) {
                     row.dataset.filteredOut = 'false';
                     visibleCount++;
                 } else {
@@ -1228,8 +1307,13 @@
                 noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
             }
 
-            if (paginator) paginator.reset();
-        });
+            if (pag) pag.reset();
+        }
+
+        input.addEventListener('input', applyFilter);
+        if (select) {
+            select.addEventListener('change', applyFilter);
+        }
     }
 
     // Custom filtering for Logs (combines search input + dropdown filter)
@@ -1274,15 +1358,22 @@
     function filterFeedbacks() {
         const searchInput = document.getElementById('search-feedback-input');
         const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const searchCol = document.getElementById('filter-feedback-select')?.value || 'all';
 
         const rows = document.querySelectorAll('.feedback-row');
         let visibleCount = 0;
 
         rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
             const rowStatus = row.getAttribute('data-status');
+            let textToSearch = '';
+            if (searchCol === 'all') {
+                textToSearch = row.textContent.toLowerCase();
+            } else {
+                const cell = row.querySelector(`[data-col="${searchCol}"]`);
+                textToSearch = cell ? cell.textContent.toLowerCase() : row.textContent.toLowerCase();
+            }
 
-            let matchesSearch = !searchVal || text.includes(searchVal);
+            let matchesSearch = !searchVal || textToSearch.includes(searchVal);
             let matchesStatus = (currentFeedbackStatus === 'all' || rowStatus === currentFeedbackStatus);
 
             if (matchesSearch && matchesStatus) {
@@ -1354,15 +1445,16 @@
         logsPag = createPaginator({ itemSelector: '.log-row', paginationContainerId: 'logs-pagination', pageSize: 30 });
         feedbacksPag = createPaginator({ itemSelector: '.feedback-row', paginationContainerId: 'feedbacks-pagination', pageSize: 30 });
 
-        setupInstantTableFilter('search-pending-user-input', 'pending-user-row', 'no-pending-users-row', pendingUsersPag);
-        setupInstantTableFilter('search-pending-book-input', 'pending-book-row', 'no-pending-books-row', pendingBooksPag);
-        setupInstantTableFilter('search-pending-article-input', 'pending-article-row', 'no-pending-articles-row', pendingArticlesPag);
+        setupInstantTableFilter('search-pending-user-input', 'filter-pending-user-select', 'pending-user-row', 'no-pending-users-row', pendingUsersPag);
+        setupInstantTableFilter('search-pending-book-input', 'filter-pending-book-select', 'pending-book-row', 'no-pending-books-row', pendingBooksPag);
+        setupInstantTableFilter('search-pending-article-input', 'filter-pending-article-select', 'pending-article-row', 'no-pending-articles-row', pendingArticlesPag);
+        setupInstantTableFilter('search-category-input', 'filter-category-select', 'category-row', 'no-categories-row', categoriesPag);
 
-        setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row', allUsersPag);
-        setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row', allBooksPag);
-        setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row', allArticlesPag);
-        setupInstantTableFilter('search-hl-book-input', 'hl-book-row', 'no-hl-books-row', hlBooksPag);
-        setupInstantTableFilter('search-hl-article-input', 'hl-article-row', 'no-hl-articles-row', hlArticlesPag);
+        setupInstantTableFilter('search-user-input', 'filter-user-select', 'user-row', 'no-users-row', allUsersPag);
+        setupInstantTableFilter('search-book-input', 'filter-book-select', 'book-row', 'no-books-row', allBooksPag);
+        setupInstantTableFilter('search-article-input', 'filter-article-select', 'article-row', 'no-articles-row', allArticlesPag);
+        setupInstantTableFilter('search-hl-book-input', 'filter-hl-book-select', 'hl-book-row', 'no-hl-books-row', hlBooksPag);
+        setupInstantTableFilter('search-hl-article-input', 'filter-hl-article-select', 'hl-article-row', 'no-hl-articles-row', hlArticlesPag);
         
         // Log tab filters
         const searchLogInput = document.getElementById('search-log-input');
@@ -1374,8 +1466,12 @@
 
         // Feedback tab search filter
         const searchFeedbackInput = document.getElementById('search-feedback-input');
+        const filterFeedbackSelect = document.getElementById('filter-feedback-select');
         if (searchFeedbackInput) {
             searchFeedbackInput.addEventListener('input', filterFeedbacks);
+        }
+        if (filterFeedbackSelect) {
+            filterFeedbackSelect.addEventListener('change', filterFeedbacks);
         }
     });
 </script>
