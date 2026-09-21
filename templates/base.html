@@ -20,7 +20,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom Style -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=23.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=24.0">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -405,6 +405,137 @@
         })();
     </script>
     {% endif %}
+
+    <!-- Global Antigravity Pagination Helper Script -->
+    <script>
+        function createPaginator(config) {
+            const {
+                itemSelector,
+                paginationContainerId,
+                pageSize = 30,
+                filterFn = null,
+                onPageChange = null
+            } = config;
+
+            let currentPage = 1;
+            const paginationContainer = document.getElementById(paginationContainerId);
+            if (!paginationContainer) return null;
+
+            function getVisibleItems() {
+                const allItems = Array.from(document.querySelectorAll(itemSelector));
+                return allItems.filter(item => {
+                    if (item.classList.contains('no-paginate-ignore')) return false;
+                    if (filterFn) return filterFn(item);
+                    return item.dataset.filteredOut !== 'true';
+                });
+            }
+
+            function render() {
+                const allItems = Array.from(document.querySelectorAll(itemSelector));
+                const visibleItems = getVisibleItems();
+                const totalItems = visibleItems.length;
+                const totalPages = Math.ceil(totalItems / pageSize) || 1;
+
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
+
+                const startIdx = (currentPage - 1) * pageSize;
+                const endIdx = startIdx + pageSize;
+
+                // Hide items not in visible set
+                allItems.forEach(item => {
+                    if (!visibleItems.includes(item)) {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Show only items for current page
+                visibleItems.forEach((item, idx) => {
+                    if (idx >= startIdx && idx < endIdx) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                if (totalItems <= pageSize) {
+                    paginationContainer.innerHTML = '';
+                    paginationContainer.style.display = 'none';
+                    return;
+                }
+
+                paginationContainer.style.display = 'block';
+
+                let pageBtnsHtml = '';
+                for (let p = 1; p <= totalPages; p++) {
+                    if (totalPages > 7) {
+                        if (p !== 1 && p !== totalPages && Math.abs(p - currentPage) > 1) {
+                            if (p === 2 || p === totalPages - 1) {
+                                pageBtnsHtml += `<span style="padding: 0 0.35rem; color: var(--text-secondary); opacity: 0.5;">...</span>`;
+                            }
+                            continue;
+                        }
+                    }
+                    if (p === currentPage) {
+                        pageBtnsHtml += `<button type="button" class="btn btn-primary btn-sm" style="background: var(--accent-indigo); color: white; padding: 0.35rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; box-shadow: 0 2px 8px rgba(99,102,241,0.3); border: none;">${p}</button>`;
+                    } else {
+                        pageBtnsHtml += `<button type="button" class="btn btn-secondary btn-sm pg-goto-btn" data-page="${p}" style="padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.8rem; background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border-glass);">${p}</button>`;
+                    }
+                }
+
+                paginationContainer.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 0.75rem; padding: 0.85rem 0.5rem; margin-top: 0.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem; color: var(--text-secondary);">
+                        <div>
+                            Showing <strong style="color: var(--text-primary);">${startIdx + 1}</strong> to <strong style="color: var(--text-primary);">${Math.min(endIdx, totalItems)}</strong> of <strong style="color: var(--text-primary);">${totalItems}</strong> entries
+                        </div>
+                        <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary btn-sm pg-prev-btn" ${currentPage === 1 ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 0.35rem 0.75rem; font-size: 0.8rem;"' : 'style="padding: 0.35rem 0.75rem; font-size: 0.8rem;"'}>
+                                <i class="fa-solid fa-chevron-left"></i> Previous
+                            </button>
+                            ${pageBtnsHtml}
+                            <button type="button" class="btn btn-secondary btn-sm pg-next-btn" ${currentPage === totalPages ? 'disabled style="opacity: 0.4; cursor: not-allowed; padding: 0.35rem 0.75rem; font-size: 0.8rem;"' : 'style="padding: 0.35rem 0.75rem; font-size: 0.8rem;"'}>
+                                Next <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                const prevBtn = paginationContainer.querySelector('.pg-prev-btn');
+                if (prevBtn && currentPage > 1) {
+                    prevBtn.onclick = () => {
+                        currentPage--;
+                        render();
+                        if (onPageChange) onPageChange(currentPage);
+                    };
+                }
+
+                const nextBtn = paginationContainer.querySelector('.pg-next-btn');
+                if (nextBtn && currentPage < totalPages) {
+                    nextBtn.onclick = () => {
+                        currentPage++;
+                        render();
+                        if (onPageChange) onPageChange(currentPage);
+                    };
+                }
+
+                paginationContainer.querySelectorAll('.pg-goto-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        currentPage = parseInt(btn.getAttribute('data-page'));
+                        render();
+                        if (onPageChange) onPageChange(currentPage);
+                    };
+                });
+            }
+
+            render();
+
+            return {
+                reset: () => { currentPage = 1; render(); },
+                update: () => { render(); },
+                getPage: () => currentPage
+            };
+        }
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

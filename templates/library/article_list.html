@@ -81,6 +81,7 @@
             <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try adjusting your search terms or category filter to find matching articles.</p>
         </div>
     </div>
+    <div id="articles-pagination"></div>
 {% else %}
     <div class="glass" style="padding: 4rem 2rem; text-align: center;">
         <i class="fa-regular fa-newspaper" style="font-size: 4.5rem; color: var(--text-secondary); margin-bottom: 1.5rem; opacity: 0.6;"></i>
@@ -93,6 +94,7 @@
 
 {% block extra_js %}
 <script>
+    let articlesPag = null;
     function filterArticles() {
         const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
         const categoryVal = document.getElementById('category-filter').value.toLowerCase().trim();
@@ -108,10 +110,10 @@
             const matchesCategory = !categoryVal || category === categoryVal;
             
             if (matchesSearch && matchesCategory) {
-                card.style.display = '';
+                card.dataset.filteredOut = 'false';
                 visibleCount++;
             } else {
-                card.style.display = 'none';
+                card.dataset.filteredOut = 'true';
             }
         });
         
@@ -119,6 +121,8 @@
         if (noResults) {
             noResults.style.display = visibleCount === 0 ? 'block' : 'none';
         }
+
+        if (articlesPag) articlesPag.reset();
     }
 
     function resetSearch() {
@@ -127,7 +131,10 @@
         filterArticles();
     }
 
-    document.getElementById('search-input').addEventListener('input', filterArticles);
-    document.getElementById('category-filter').addEventListener('change', filterArticles);
+    document.addEventListener('DOMContentLoaded', function() {
+        articlesPag = createPaginator({ itemSelector: '.article-card', paginationContainerId: 'articles-pagination', pageSize: 30 });
+        document.getElementById('search-input').addEventListener('input', filterArticles);
+        document.getElementById('category-filter').addEventListener('change', filterArticles);
+    });
 </script>
 {% endblock %}

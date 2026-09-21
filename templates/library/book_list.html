@@ -99,6 +99,7 @@
             <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try adjusting your search keywords or choosing different filters.</p>
         </div>
     </div>
+    <div id="books-pagination"></div>
 {% else %}
     <div class="glass" style="padding: 4rem 2rem; text-align: center;">
         <i class="fa-solid fa-book-open-reader" style="font-size: 4.5rem; color: var(--text-secondary); margin-bottom: 1.5rem; opacity: 0.6;"></i>
@@ -111,6 +112,7 @@
 
 {% block extra_js %}
 <script>
+    let booksPag = null;
     function filterBooks() {
         const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
         const categoryVal = document.getElementById('category-filter').value;
@@ -129,21 +131,19 @@
             let matchesDept = !deptVal || depts.includes(deptVal);
             
             if (matchesSearch && matchesCategory && matchesDept) {
-                card.style.display = '';
+                card.dataset.filteredOut = 'false';
                 visibleCount++;
             } else {
-                card.style.display = 'none';
+                card.dataset.filteredOut = 'true';
             }
         });
         
         const noResults = document.getElementById('no-results-msg');
         if (noResults) {
-            if (visibleCount === 0) {
-                noResults.style.display = 'block';
-            } else {
-                noResults.style.display = 'none';
-            }
+            noResults.style.display = (visibleCount === 0) ? 'block' : 'none';
         }
+
+        if (booksPag) booksPag.reset();
     }
 
     function resetFilters() {
@@ -153,9 +153,11 @@
         filterBooks();
     }
 
-    // Bind real-time input event listeners
-    document.getElementById('search-input').addEventListener('input', filterBooks);
-    document.getElementById('category-filter').addEventListener('change', filterBooks);
-    document.getElementById('dept-filter').addEventListener('change', filterBooks);
+    document.addEventListener('DOMContentLoaded', function() {
+        booksPag = createPaginator({ itemSelector: '.book-card', paginationContainerId: 'books-pagination', pageSize: 30 });
+        document.getElementById('search-input').addEventListener('input', filterBooks);
+        document.getElementById('category-filter').addEventListener('change', filterBooks);
+        document.getElementById('dept-filter').addEventListener('change', filterBooks);
+    });
 </script>
 {% endblock %}

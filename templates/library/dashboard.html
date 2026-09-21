@@ -93,6 +93,7 @@
                     </tr>
                 </tbody>
             </table>
+            <div id="user-books-pagination"></div>
         </div>
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
@@ -173,6 +174,7 @@
                     </tr>
                 </tbody>
             </table>
+            <div id="user-articles-pagination"></div>
         </div>
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
@@ -186,27 +188,20 @@
 {% block extra_js %}
 <script>
     function openTab(evt, tabId) {
-        // Declare all variables
         var i, tabcontent, tablinks;
-
-        // Get all elements with class="tab-content" and hide them
         tabcontent = document.getElementsByClassName("tab-content");
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].classList.remove("active");
         }
-
-        // Get all elements with class="tab-btn" and remove the class "active"
         tablinks = document.getElementsByClassName("tab-btn");
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].classList.remove("active");
         }
-
-        // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(tabId).classList.add("active");
         evt.currentTarget.classList.add("active");
     }
 
-    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId) {
+    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId, paginator) {
         const input = document.getElementById(inputId);
         if (!input) return;
 
@@ -218,10 +213,10 @@
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 if (text.includes(filterValue)) {
-                    row.style.display = '';
+                    row.dataset.filteredOut = 'false';
                     visibleCount++;
                 } else {
-                    row.style.display = 'none';
+                    row.dataset.filteredOut = 'true';
                 }
             });
 
@@ -229,12 +224,17 @@
             if (noResultsRow) {
                 noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
             }
+
+            if (paginator) paginator.reset();
         });
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        setupInstantTableFilter('search-user-book-input', 'user-book-row', 'no-user-books-row');
-        setupInstantTableFilter('search-user-article-input', 'user-article-row', 'no-user-articles-row');
+        const userBooksPag = createPaginator({ itemSelector: '.user-book-row', paginationContainerId: 'user-books-pagination', pageSize: 30 });
+        const userArticlesPag = createPaginator({ itemSelector: '.user-article-row', paginationContainerId: 'user-articles-pagination', pageSize: 30 });
+
+        setupInstantTableFilter('search-user-book-input', 'user-book-row', 'no-user-books-row', userBooksPag);
+        setupInstantTableFilter('search-user-article-input', 'user-article-row', 'no-user-articles-row', userArticlesPag);
     });
 </script>
 {% endblock %}

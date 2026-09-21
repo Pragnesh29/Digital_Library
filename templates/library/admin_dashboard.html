@@ -91,7 +91,7 @@
                 </thead>
                 <tbody>
                     {% for p_user in pending_users %}
-                        <tr>
+                        <tr class="pending-user-row">
                             <td><strong>{{ p_user.username }}</strong></td>
                             <td>{{ p_user.first_name }}</td>
                             <td>
@@ -129,6 +129,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="pending-users-pagination"></div>
         </div>
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
@@ -154,7 +155,7 @@
                 </thead>
                 <tbody>
                     {% for book in pending_books %}
-                        <tr>
+                        <tr class="pending-book-row">
                             <td>
                                 <strong>{{ book.title }}</strong>
                                 {% if book.description %}
@@ -222,6 +223,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="pending-books-pagination"></div>
         </div>
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
@@ -246,7 +248,7 @@
                 </thead>
                 <tbody>
                     {% for article in pending_articles %}
-                        <tr>
+                        <tr class="pending-article-row">
                             <td><strong>{{ article.title }}</strong></td>
                             <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ article.description }}</td>
                             <td>{{ article.uploaded_by.first_name|default:article.uploaded_by.username }}</td>
@@ -304,6 +306,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="pending-articles-pagination"></div>
         </div>
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
@@ -358,7 +361,7 @@
                 </thead>
                 <tbody>
                     {% for cat in all_categories %}
-                        <tr>
+                        <tr class="category-row">
                             <td><strong>{{ cat.name }}</strong></td>
                             <td>
                                 {% if cat.target_type == 'both' %}
@@ -389,6 +392,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="categories-pagination"></div>
         </div>
     {% else %}
         <div class="glass" style="padding: 3rem; text-align: center;">
@@ -601,6 +605,7 @@
                 </tr>
             </tbody>
         </table>
+        <div id="all-users-pagination"></div>
     </div>
 </div>
 {% endif %}
@@ -686,6 +691,7 @@
                 </tr>
             </tbody>
         </table>
+        <div id="all-books-pagination"></div>
     </div>
 </div>
 
@@ -760,6 +766,7 @@
                 </tr>
             </tbody>
         </table>
+        <div id="all-articles-pagination"></div>
     </div>
 </div>
 
@@ -811,6 +818,7 @@
                 </tr>
             </tbody>
         </table>
+        <div id="logs-pagination"></div>
     </div>
 </div>
 {% endif %}
@@ -1166,7 +1174,7 @@
     }
 
     // Instant table-row text filtering function
-    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId) {
+    function setupInstantTableFilter(inputId, rowClassName, noResultsRowId, paginator) {
         const input = document.getElementById(inputId);
         if (!input) return;
 
@@ -1178,25 +1186,24 @@
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 if (text.includes(filterValue)) {
-                    row.style.display = '';
+                    row.dataset.filteredOut = 'false';
                     visibleCount++;
                 } else {
-                    row.style.display = 'none';
+                    row.dataset.filteredOut = 'true';
                 }
             });
 
             const noResultsRow = document.getElementById(noResultsRowId);
             if (noResultsRow) {
-                if (visibleCount === 0) {
-                    noResultsRow.style.display = '';
-                } else {
-                    noResultsRow.style.display = 'none';
-                }
+                noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
             }
+
+            if (paginator) paginator.reset();
         });
     }
 
     // Custom filtering for Logs (combines search input + dropdown filter)
+    let logsPag = null;
     function filterLogs() {
         const searchInput = document.getElementById('search-log-input');
         const typeFilter = document.getElementById('log-type-filter');
@@ -1216,21 +1223,50 @@
             let matchesType = !typeVal || type === typeVal;
 
             if (matchesSearch && matchesType) {
-                row.style.display = '';
+                row.dataset.filteredOut = 'false';
                 visibleCount++;
             } else {
-                row.style.display = 'none';
+                row.dataset.filteredOut = 'true';
             }
         });
 
         const noResultsRow = document.getElementById('no-logs-row');
         if (noResultsRow) {
-            if (visibleCount === 0) {
-                noResultsRow.style.display = '';
-            } else {
-                noResultsRow.style.display = 'none';
-            }
+            noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
         }
+
+        if (logsPag) logsPag.reset();
+    }
+
+    let feedbacksPag = null;
+    function filterFeedbackStatus(status, btn) {
+        const filterBtns = document.querySelectorAll('.fb-filter-btn');
+        filterBtns.forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-secondary)';
+        });
+        btn.style.background = 'var(--accent-indigo)';
+        btn.style.color = 'white';
+
+        const rows = document.querySelectorAll('.feedback-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status');
+            if (status === 'all' || rowStatus === status) {
+                row.dataset.filteredOut = 'false';
+                visibleCount++;
+            } else {
+                row.dataset.filteredOut = 'true';
+            }
+        });
+
+        const noResultsRow = document.getElementById('no-feedbacks-row');
+        if (noResultsRow) {
+            noResultsRow.style.display = (visibleCount === 0) ? '' : 'none';
+        }
+
+        if (feedbacksPag) feedbacksPag.reset();
     }
 
     // Initial setup on DOM Content Loaded
@@ -1257,11 +1293,27 @@
             }
         });
 
-        setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row');
-        setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row');
-        setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row');
-        setupInstantTableFilter('search-hl-book-input', 'hl-book-row', 'no-hl-books-row');
-        setupInstantTableFilter('search-hl-article-input', 'hl-article-row', 'no-hl-articles-row');
+        // Initialize Paginators for all tables (Max 30 items per page)
+        const pendingUsersPag = createPaginator({ itemSelector: '.pending-user-row', paginationContainerId: 'pending-users-pagination', pageSize: 30 });
+        const pendingBooksPag = createPaginator({ itemSelector: '.pending-book-row', paginationContainerId: 'pending-books-pagination', pageSize: 30 });
+        const pendingArticlesPag = createPaginator({ itemSelector: '.pending-article-row', paginationContainerId: 'pending-articles-pagination', pageSize: 30 });
+        const categoriesPag = createPaginator({ itemSelector: '.category-row', paginationContainerId: 'categories-pagination', pageSize: 30 });
+
+        const hlBooksPag = createPaginator({ itemSelector: '.hl-book-row', paginationContainerId: 'hl-books-pagination', pageSize: 30 });
+        const hlArticlesPag = createPaginator({ itemSelector: '.hl-article-row', paginationContainerId: 'hl-articles-pagination', pageSize: 30 });
+
+        const allUsersPag = createPaginator({ itemSelector: '.user-row', paginationContainerId: 'all-users-pagination', pageSize: 30 });
+        const allBooksPag = createPaginator({ itemSelector: '.book-row', paginationContainerId: 'all-books-pagination', pageSize: 30 });
+        const allArticlesPag = createPaginator({ itemSelector: '.article-row', paginationContainerId: 'all-articles-pagination', pageSize: 30 });
+        
+        logsPag = createPaginator({ itemSelector: '.log-row', paginationContainerId: 'logs-pagination', pageSize: 30 });
+        feedbacksPag = createPaginator({ itemSelector: '.feedback-row', paginationContainerId: 'feedbacks-pagination', pageSize: 30 });
+
+        setupInstantTableFilter('search-user-input', 'user-row', 'no-users-row', allUsersPag);
+        setupInstantTableFilter('search-book-input', 'book-row', 'no-books-row', allBooksPag);
+        setupInstantTableFilter('search-article-input', 'article-row', 'no-articles-row', allArticlesPag);
+        setupInstantTableFilter('search-hl-book-input', 'hl-book-row', 'no-hl-books-row', hlBooksPag);
+        setupInstantTableFilter('search-hl-article-input', 'hl-article-row', 'no-hl-articles-row', hlArticlesPag);
         
         // Log tab filters
         const searchLogInput = document.getElementById('search-log-input');
