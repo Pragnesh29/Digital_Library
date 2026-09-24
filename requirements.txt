@@ -3,3 +3,5 @@ pillow>=10.0
 gunicorn>=21.0
 sqlparse>=0.5
 asgiref>=3.8
+pypdf>=3.0.0
+python-docx>=1.0.0

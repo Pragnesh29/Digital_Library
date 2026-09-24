@@ -7,20 +7,71 @@ from .forms import BookUploadForm, ArticleUploadForm, FeedbackForm
 from .utils import log_action
 from accounts.models import CustomUser, Department, Group
 
-def pdf_contains_text(pdf_file, query):
-    if not pdf_file:
+def file_contains_text(file_obj, query):
+    """
+    Check if a given FileField/FieldFile contains the query string (case-insensitive).
+    Extracts text from PDF, TXT, CSV, MD, DOCX, etc.
+    """
+    if not file_obj:
         return False
+    query_lower = query.lower().strip()
+    if not query_lower:
+        return False
+
     try:
-        import pypdf
-        reader = pypdf.PdfReader(pdf_file.path)
-        query_lower = query.lower()
-        for page in reader.pages:
-            text = page.extract_text()
-            if text and query_lower in text.lower():
-                return True
+        file_path = file_obj.path
     except Exception:
-        pass
+        return False
+
+    filename = (file_obj.name or '').lower()
+
+    # 1. PDF Documents
+    if filename.endswith('.pdf'):
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(file_path)
+            for page in reader.pages:
+                text = page.extract_text()
+                if text and query_lower in text.lower():
+                    return True
+        except Exception:
+            pass
+
+        try:
+            import PyPDF2
+            reader = PyPDF2.PdfReader(file_path)
+            for page in reader.pages:
+                text = page.extract_text()
+                if text and query_lower in text.lower():
+                    return True
+        except Exception:
+            pass
+
+    # 2. Plain Text / Markdown / CSV / JSON / XML / Code / Log files
+    elif any(filename.endswith(ext) for ext in ['.txt', '.csv', '.md', '.rtf', '.json', '.log', '.xml', '.html', '.py']):
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                if query_lower in content.lower():
+                    return True
+        except Exception:
+            pass
+
+    # 3. Word Documents (.docx)
+    elif filename.endswith('.docx'):
+        try:
+            import docx
+            doc = docx.Document(file_path)
+            for p in doc.paragraphs:
+                if query_lower in p.text.lower():
+                    return True
+        except Exception:
+            pass
+
     return False
+
+def pdf_contains_text(pdf_file, query):
+    return file_contains_text(pdf_file, query)
 
 def apply_visibility_filter(qs, user):
     """
@@ -58,43 +109,69 @@ def home_view(request):
         approved_articles = apply_visibility_filter(Article.objects.filter(is_approved=True), request.user)
 
         if not is_deep_search:
-            # Standard Title & Category search
+            # Standard Title, Description & Category search
             matching_books = list(approved_books.filter(
-                Q(title__icontains=query) | Q(category_tag__icontains=query)
-            ).order_by('-created_at'))
+                Q(title__icontains=query) |
+                Q(description__icontains=query) |
+                Q(category_tag__icontains=query) |
+                Q(category__name__icontains=query)
+            ).distinct().order_by('-created_at'))
             matching_articles = list(approved_articles.filter(
-                Q(title__icontains=query)
-            ).order_by('-created_at'))
+                Q(title__icontains=query) |
+                Q(description__icontains=query) |
+                Q(category_tag__icontains=query) |
+                Q(category__name__icontains=query)
+            ).distinct().order_by('-created_at'))
         else:
-            # Deep Search: search inside PDF content for books, and full description/keywords/PDF attachments for articles
+            # Deep Search: search title, description, category, uploader AND inside PDF/attachment text contents
             candidate_articles = list(approved_articles.order_by('-created_at'))
             matched_a_list = []
+            query_lower = query.lower()
             for a in candidate_articles:
-                if (query.lower() in a.title.lower() or 
-                    query.lower() in a.description.lower() or 
-                    query.lower() in a.uploaded_by.username.lower()):
+                cat_name = (a.get_category_name() or '').lower()
+                title_text = (a.title or '').lower()
+                desc_text = (a.description or '').lower()
+                cat_tag = (a.category_tag or '').lower()
+                uploader_name = (a.uploaded_by.username or '').lower()
+
+                if (query_lower in title_text or 
+                    query_lower in desc_text or 
+                    query_lower in cat_tag or 
+                    query_lower in cat_name or 
+                    query_lower in uploader_name):
                     matched_a_list.append(a)
                 else:
-                    # Check PDF attachments of the article
-                    pdf_match = False
+                    # Check file attachments of the article (PDFs, Word Docs, TXT, etc.)
+                    att_match = False
                     for att in a.attachments.all():
-                        if att.is_pdf() and pdf_contains_text(att.file, query):
-                            pdf_match = True
+                        att_fname = (att.file_name or att.file.name or '').lower()
+                        if query_lower in att_fname or (att.file and file_contains_text(att.file, query)):
+                            att_match = True
                             break
-                    if pdf_match:
+                    if att_match:
                         matched_a_list.append(a)
             matching_articles = matched_a_list
 
-            # For books: check title, category_tag, uploader, AND pdf text content
+            # For books: check title, description, category, uploader, AND pdf text content / pdf file name
             candidate_books = list(approved_books.order_by('-created_at'))
             matched_b_list = []
             for b in candidate_books:
-                if (query.lower() in b.title.lower() or 
-                    query.lower() in b.category_tag.lower() or 
-                    query.lower() in b.uploaded_by.username.lower()):
+                cat_name = (b.get_category_name() or '').lower()
+                title_text = (b.title or '').lower()
+                desc_text = (b.description or '').lower()
+                cat_tag = (b.category_tag or '').lower()
+                uploader_name = (b.uploaded_by.username or '').lower()
+
+                if (query_lower in title_text or 
+                    query_lower in desc_text or 
+                    query_lower in cat_tag or 
+                    query_lower in cat_name or 
+                    query_lower in uploader_name):
                     matched_b_list.append(b)
-                elif pdf_contains_text(b.pdf, query):
-                    matched_b_list.append(b)
+                elif b.pdf:
+                    pdf_fname = (b.pdf.name or '').lower()
+                    if query_lower in pdf_fname or file_contains_text(b.pdf, query):
+                        matched_b_list.append(b)
             matching_books = matched_b_list
 
     # Fetch highlighted books and articles for the home page carousel with visibility restrictions applied
