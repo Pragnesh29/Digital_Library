@@ -75,6 +75,12 @@ class Article(models.Model):
             return self.category.name
         return "General"
 
+    def non_image_attachments(self):
+        return [att for att in self.attachments.all() if not att.is_image()]
+
+    def non_image_attachments_count(self):
+        return len(self.non_image_attachments())
+
     def __str__(self):
         return self.title
 
