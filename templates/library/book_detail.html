@@ -7,6 +7,25 @@
     </a>
 </div>
 
+<style>
+    @media (max-width: 768px) {
+        .detail-layout {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+        }
+        .detail-sidebar {
+            position: static !important;
+            top: auto !important;
+        }
+        .detail-cover {
+            height: auto !important;
+            max-height: 380px !important;
+            object-fit: contain !important;
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+    }
+</style>
+
 <div class="detail-layout">
     <!-- Sidebar -->
     <div class="detail-sidebar">

@@ -800,15 +800,28 @@ html[data-theme="light"] .carousel-control:hover {
     margin-top: 2rem;
 }
 
-@media (max-width: 768px) {
-    .detail-layout {
-        grid-template-columns: 1fr;
+@media (min-width: 769px) {
+    .detail-sidebar {
+        position: sticky;
+        top: 100px;
     }
 }
 
-.detail-sidebar {
-    position: sticky;
-    top: 100px;
+@media (max-width: 768px) {
+    .detail-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .detail-sidebar {
+        position: static !important;
+        top: auto !important;
+    }
+    .detail-cover {
+        height: auto;
+        max-height: 380px;
+        object-fit: contain;
+        background: rgba(0, 0, 0, 0.2);
+    }
 }
 
 .detail-cover {
