@@ -119,7 +119,6 @@ def home_view(request):
             matching_articles = list(approved_articles.filter(
                 Q(title__icontains=query) |
                 Q(description__icontains=query) |
-                Q(category_tag__icontains=query) |
                 Q(category__name__icontains=query)
             ).distinct().order_by('-created_at'))
         else:
@@ -131,12 +130,10 @@ def home_view(request):
                 cat_name = (a.get_category_name() or '').lower()
                 title_text = (a.title or '').lower()
                 desc_text = (a.description or '').lower()
-                cat_tag = (a.category_tag or '').lower()
                 uploader_name = (a.uploaded_by.username or '').lower()
 
                 if (query_lower in title_text or 
                     query_lower in desc_text or 
-                    query_lower in cat_tag or 
                     query_lower in cat_name or 
                     query_lower in uploader_name):
                     matched_a_list.append(a)
@@ -144,7 +141,7 @@ def home_view(request):
                     # Check file attachments of the article (PDFs, Word Docs, TXT, etc.)
                     att_match = False
                     for att in a.attachments.all():
-                        att_fname = (att.file_name or att.file.name or '').lower()
+                        att_fname = (att.file_name or (att.file.name if att.file else '') or '').lower()
                         if query_lower in att_fname or (att.file and file_contains_text(att.file, query)):
                             att_match = True
                             break
