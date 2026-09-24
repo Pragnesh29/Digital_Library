@@ -1,11 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Articles - Sarvatra GyanKosh{% endblock %}
 {% block content %}
-<div class="catalog-header">
+<div class="catalog-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div class="catalog-title">
         <h2>Approved Articles</h2>
     </div>
-    <div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+        <button type="button" id="toggle-filter-btn" class="btn btn-secondary" onclick="toggleFilterDiv();" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1rem;" title="Toggle Search & Filter Container">
+            <i class="fa-solid fa-filter-circle-xmark" id="toggle-filter-icon"></i>
+            <span id="toggle-filter-text">Hide Filters</span>
+        </button>
         <a href="{% url 'article_upload' %}" class="btn btn-primary">
             <i class="fa-solid fa-cloud-arrow-up"></i> Upload Article
         </a>
@@ -13,7 +17,7 @@
 </div>
 
 <!-- Instant Client-Side Search & Category Filter Form -->
-<form onsubmit="event.preventDefault();" class="glass filter-grid" style="padding: 1.5rem; margin-bottom: 2rem;">
+<form id="filter-container-div" onsubmit="event.preventDefault();" class="glass filter-grid" style="padding: 1.5rem; margin-bottom: 2rem;">
     <div class="form-group" style="margin-bottom: 0;">
         <label for="search-input" style="font-size: 0.85rem; margin-bottom: 0.35rem;">Search by Article Title or Description</label>
         <input type="text" id="search-input" class="form-control" placeholder="Type keywords to filter instantly...">
@@ -95,6 +99,25 @@
 {% block extra_js %}
 <script>
     let articlesPag = null;
+
+    function toggleFilterDiv() {
+        const container = document.getElementById('filter-container-div');
+        const btnText = document.getElementById('toggle-filter-text');
+        const btnIcon = document.getElementById('toggle-filter-icon');
+        
+        if (container.style.display === 'none') {
+            container.style.display = 'grid';
+            if (btnText) btnText.textContent = 'Hide Filters';
+            if (btnIcon) btnIcon.className = 'fa-solid fa-filter-circle-xmark';
+            localStorage.setItem('article_filter_visible', 'true');
+        } else {
+            container.style.display = 'none';
+            if (btnText) btnText.textContent = 'Show Filters';
+            if (btnIcon) btnIcon.className = 'fa-solid fa-filter';
+            localStorage.setItem('article_filter_visible', 'false');
+        }
+    }
+
     function filterArticles() {
         const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
         const categoryVal = document.getElementById('category-filter').value.toLowerCase().trim();
@@ -132,6 +155,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('article_filter_visible') === 'false') {
+            const container = document.getElementById('filter-container-div');
+            const btnText = document.getElementById('toggle-filter-text');
+            const btnIcon = document.getElementById('toggle-filter-icon');
+            if (container) container.style.display = 'none';
+            if (btnText) btnText.textContent = 'Show Filters';
+            if (btnIcon) btnIcon.className = 'fa-solid fa-filter';
+        }
+
         articlesPag = createPaginator({ itemSelector: '.article-card', paginationContainerId: 'articles-pagination', pageSize: 30 });
         document.getElementById('search-input').addEventListener('input', filterArticles);
         document.getElementById('category-filter').addEventListener('change', filterArticles);
