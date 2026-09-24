@@ -1032,6 +1032,7 @@
                 </tbody>
             </table>
         </div>
+        <div id="feedbacks-pagination" style="margin-top: 1.5rem;"></div>
     {% else %}
         <div class="glass" style="padding: 4rem 2rem; text-align: center;">
             <i class="fa-solid fa-comment-dots" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem; opacity: 0.5;"></i>
@@ -1364,7 +1365,7 @@
         let visibleCount = 0;
 
         rows.forEach(row => {
-            const rowStatus = row.getAttribute('data-status');
+            const rowStatus = (row.getAttribute('data-status') || '').toLowerCase().trim();
             let textToSearch = '';
             if (searchCol === 'all') {
                 textToSearch = row.textContent.toLowerCase();
@@ -1374,13 +1375,16 @@
             }
 
             let matchesSearch = !searchVal || textToSearch.includes(searchVal);
-            let matchesStatus = (currentFeedbackStatus === 'all' || rowStatus === currentFeedbackStatus);
+            let targetStatus = currentFeedbackStatus.toLowerCase().trim();
+            let matchesStatus = (targetStatus === 'all' || rowStatus === targetStatus);
 
             if (matchesSearch && matchesStatus) {
                 row.dataset.filteredOut = 'false';
+                row.style.display = '';
                 visibleCount++;
             } else {
                 row.dataset.filteredOut = 'true';
+                row.style.display = 'none';
             }
         });
 
@@ -1396,11 +1400,15 @@
         currentFeedbackStatus = status;
         const filterBtns = document.querySelectorAll('.fb-filter-btn');
         filterBtns.forEach(b => {
+            b.classList.remove('active-fb-filter');
             b.style.background = 'transparent';
             b.style.color = 'var(--text-secondary)';
         });
-        btn.style.background = 'var(--accent-indigo)';
-        btn.style.color = 'white';
+        if (btn) {
+            btn.classList.add('active-fb-filter');
+            btn.style.background = 'var(--accent-indigo)';
+            btn.style.color = 'white';
+        }
 
         filterFeedbacks();
     }
