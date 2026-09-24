@@ -31,6 +31,7 @@ def signup_view(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.is_approved = False  # Explicitly set to false
+            user.role = 'user'  # Default role is Standard User
             user.save()
             messages.success(request, "Registration successful! Your account has been sent for admin approval.")
             log_action(None, "User Registered", f"New user '{user.username}' created and pending approval")

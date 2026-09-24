@@ -8,15 +8,10 @@ class UserSignupForm(UserCreationForm):
     contact_no = forms.CharField(max_length=15, required=True, label="Contact Number")
     department = forms.ModelChoiceField(queryset=Department.objects.all(), required=True, label="Division/Department")
     group = forms.ModelChoiceField(queryset=Group.objects.all(), required=True, label="Group")
-    role = forms.ChoiceField(
-        choices=[('user', 'Standard User'), ('faculty', 'Faculty Approver')],
-        required=True,
-        label="Register As"
-    )
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser
-        fields = UserCreationForm.Meta.fields + ('first_name', 'email', 'contact_no', 'department', 'group', 'role')
+        fields = UserCreationForm.Meta.fields + ('first_name', 'email', 'contact_no', 'department', 'group')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
