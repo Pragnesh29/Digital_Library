@@ -661,7 +661,10 @@ def user_edit_article_view(request, pk):
             updated_article.is_approved = False
             updated_article.status = 'pending'
             updated_article.save()
-            form.save_m2m()
+            # Delete old photos & files if user requested clear/replace
+            if request.POST.get('clear_existing_files') == 'on':
+                updated_article.images.all().delete()
+                updated_article.attachments.all().delete()
             
             uploaded_files = request.FILES.getlist('files') or request.FILES.getlist('attachments') or request.FILES.getlist('images')
             for f in uploaded_files:
@@ -856,9 +859,21 @@ def edit_article_view(request, article_id):
         if form.is_valid():
             form.save()
             
-            images = request.FILES.getlist('images') or request.FILES.getlist('files')
-            for img in images:
-                ArticleImage.objects.create(article=article, image=img)
+            # Delete old photos & files if user requested clear/replace
+            if request.POST.get('clear_existing_files') == 'on':
+                article.images.all().delete()
+                article.attachments.all().delete()
+
+            uploaded_files = request.FILES.getlist('files') or request.FILES.getlist('attachments') or request.FILES.getlist('images')
+            for f in uploaded_files:
+                ArticleAttachment.objects.create(
+                    article=article,
+                    file=f,
+                    file_name=f.name
+                )
+                ext = f.name.split('.')[-1].lower()
+                if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']:
+                    ArticleImage.objects.create(article=article, image=f)
                 
             messages.success(request, f"Article '{article.title}' updated successfully.")
             log_action(user, "Article Edited", f"Updated article '{article.title}' (Uploaded by: {article.uploaded_by.username})")

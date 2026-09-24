@@ -62,16 +62,33 @@
             {% endfor %}
         </div>
         
-        <!-- Gallery Management (display existing photos) -->
-        {% if article.images.exists %}
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
-                <h3 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-images" style="color: var(--accent-indigo); margin-right: 0.5rem;"></i> Existing Photos</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem;">
-                    {% for img in article.images.all %}
-                        <div style="position: relative; border-radius: 6px; border: 1px solid var(--border-glass); overflow: hidden; height: 100px;">
-                            <img src="{{ img.image.url }}" alt="Slide" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                    {% endfor %}
+        <!-- Existing Photos & Files Management -->
+        {% if article.images.exists or article.attachments.exists %}
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-photo-film" style="color: var(--accent-indigo); margin-right: 0.5rem;"></i> Existing Photos & Files</span>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: normal;">{{ article.images.count }} photos, {{ article.attachments.count }} files</span>
+                </h3>
+
+                {% if article.images.exists %}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+                        {% for img in article.images.all %}
+                            <div style="position: relative; border-radius: 6px; border: 1px solid var(--border-glass); overflow: hidden; height: 75px;">
+                                <img src="{{ img.image.url }}" alt="Slide {{ forloop.counter }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Option to Clear / Replace Old Files -->
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); padding: 0.75rem 1rem; border-radius: 6px;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: #fca5a5; font-size: 0.88rem; font-weight: 600; margin: 0;">
+                        <input type="checkbox" name="clear_existing_files" id="clear_existing_files" style="width: 16px; height: 16px; accent-color: #ef4444; cursor: pointer;">
+                        <span><i class="fa-solid fa-trash-can" style="margin-right: 0.25rem;"></i> Replace / Clear existing photos & files on save</span>
+                    </label>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary); display: block; margin-top: 0.35rem; margin-left: 1.6rem;">
+                        Check this box if you want to delete all current photos/files and replace them with your newly selected files.
+                    </span>
                 </div>
             </div>
         {% endif %}
@@ -79,9 +96,9 @@
         <!-- Attachments with Checkbox -->
         <div class="form-group" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-glass); margin-bottom: 1.25rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <label for="{{ form.files.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Add Attachments</label>
+                <label for="{{ form.files.id_for_label }}" style="font-weight: 600; color: var(--text-primary); margin: 0;">Add / Replace Photos & Files</label>
                 <label style="font-size: 0.85rem; color: var(--accent-indigo); cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
-                    <input type="checkbox" id="chk_art_files" onchange="toggleInput('chk_art_files', '{{ form.files.id_for_label }}')"> Add New Photos/Files
+                    <input type="checkbox" id="chk_art_files" onchange="toggleInput('chk_art_files', '{{ form.files.id_for_label }}')"> Upload New Photos/Files
                 </label>
             </div>
             {{ form.files }}
@@ -89,7 +106,7 @@
                 <span style="font-size: 0.8rem; color: var(--danger); display: block; margin-top: 0.25rem;">{{ error }}</span>
             {% endfor %}
             <span style="font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.35rem;">
-                Uploading photos here will append them to the existing article gallery.
+                By default, newly uploaded photos will append to the gallery. Check the "Replace / Clear existing" box above if you wish to overwrite old files.
             </span>
         </div>
 
