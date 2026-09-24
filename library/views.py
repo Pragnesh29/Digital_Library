@@ -265,13 +265,15 @@ def article_upload_view(request):
 
 @login_required
 def user_dashboard_view(request):
-    # Fetch user's uploads
+    # Fetch user's uploads and submitted feedback
     books = Book.objects.filter(uploaded_by=request.user).order_by('-created_at')
     articles = Article.objects.filter(uploaded_by=request.user).order_by('-created_at')
+    feedbacks = Feedback.objects.filter(user=request.user).order_by('-created_at')
     
     context = {
         'books': books,
         'articles': articles,
+        'feedbacks': feedbacks,
     }
     return render(request, 'library/dashboard.html', context)
 
@@ -381,8 +383,8 @@ def update_feedback_status_view(request, pk):
         if new_status in ['pending', 'resolved', 'ignored']:
             fb.status = new_status
             fb.save()
-            messages.success(request, f"Feedback #{fb.id} status updated to '{new_status.title()}'.")
-            log_action(user, "Feedback Status Updated", f"Updated feedback #{fb.id} status to '{new_status}'")
+            messages.success(request, f"Feedback #{fb.id} status updated to '{fb.get_status_display()}'.")
+            log_action(user, "Feedback Status Updated", f"Updated feedback #{fb.id} status to '{fb.get_status_display()}'")
     return redirect_to_admin_dashboard(request, 'feedback-tab')
 
 @login_required

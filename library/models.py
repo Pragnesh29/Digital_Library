@@ -134,7 +134,7 @@ class Feedback(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('resolved', 'Resolved'),
-        ('ignored', 'Ignored'),
+        ('ignored', 'N/A'),
     )
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='feedbacks')
     subject = models.CharField(max_length=200)

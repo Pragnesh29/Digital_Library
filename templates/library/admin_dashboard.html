@@ -939,7 +939,7 @@
                 <button type="button" class="btn btn-secondary btn-sm fb-filter-btn active-fb-filter" onclick="filterFeedbackStatus('all', this)" style="font-size: 0.8rem; background: var(--accent-indigo); color: white;">All</button>
                 <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('pending', this)" style="font-size: 0.8rem;">Pending</button>
                 <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('resolved', this)" style="font-size: 0.8rem;">Resolved</button>
-                <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('ignored', this)" style="font-size: 0.8rem;">Ignored</button>
+                <button type="button" class="btn btn-secondary btn-sm fb-filter-btn" onclick="filterFeedbackStatus('ignored', this)" style="font-size: 0.8rem;">N/A</button>
             </div>
         </div>
     </div>
@@ -990,7 +990,7 @@
                                 {% elif fb.status == 'resolved' %}
                                     <span class="status-badge status-approved"><i class="fa-solid fa-check-circle"></i> Resolved</span>
                                 {% else %}
-                                    <span class="status-badge" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3);"><i class="fa-solid fa-ban"></i> Ignored</span>
+                                    <span class="status-badge" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3);"><i class="fa-solid fa-ban"></i> N/A</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -1008,8 +1008,8 @@
                                             </button>
                                         {% endif %}
                                         {% if fb.status != 'ignored' %}
-                                            <button type="submit" name="status" value="ignored" class="btn btn-sm" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Mark Ignore">
-                                                <i class="fa-solid fa-ban"></i> Ignore
+                                            <button type="submit" name="status" value="ignored" class="btn btn-sm" style="background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Mark N/A">
+                                                <i class="fa-solid fa-ban"></i> N/A
                                             </button>
                                         {% endif %}
                                     </form>

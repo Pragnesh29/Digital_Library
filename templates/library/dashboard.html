@@ -15,6 +15,9 @@
     <button class="tab-btn" onclick="openTab(event, 'articles-tab')">
         <i class="fa-regular fa-newspaper"></i> Uploaded Articles ({{ articles.count }})
     </button>
+    <button class="tab-btn" onclick="openTab(event, 'feedback-tab')">
+        <i class="fa-solid fa-comments"></i> Submitted Feedback ({{ feedbacks.count }})
+    </button>
 </div>
 
 <!-- Books Tab Content -->
@@ -194,6 +197,77 @@
         </div>
     {% endif %}
 </div>
+
+<!-- Feedback Tab Content -->
+<div id="feedback-tab" class="tab-content">
+    {% if feedbacks %}
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; max-width: 600px;">
+            <select id="filter-user-feedback-select" class="form-control" style="width: auto; min-width: 130px;">
+                <option value="all">All Fields</option>
+                <option value="subject">Subject</option>
+                <option value="status">Status</option>
+            </select>
+            <input type="text" id="search-user-feedback-input" class="form-control" placeholder="Search submitted feedback..." style="flex: 1;">
+        </div>
+        <div class="glass table-container" style="padding: 1rem;">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Subject & Message</th>
+                        <th>Photos</th>
+                        <th>Submitted Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fb in feedbacks %}
+                        <tr class="user-feedback-row">
+                            <td data-col="subject">
+                                <strong style="color: var(--text-primary); display: block; margin-bottom: 0.25rem;">{{ fb.subject }}</strong>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message }}</span>
+                            </td>
+                            <td>
+                                {% if fb.images.exists %}
+                                    <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                                        {% for img in fb.images.all %}
+                                            <a href="{{ img.image.url }}" target="_blank">
+                                                <img src="{{ img.image.url }}" alt="Feedback photo" style="width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-glass);">
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span style="font-size: 0.8rem; color: var(--text-secondary); opacity: 0.6;">No photos</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ fb.created_at|date:"M d, Y, h:i A" }}</td>
+                            <td data-col="status">
+                                {% if fb.status == 'pending' %}
+                                    <span class="badge badge-pending"><i class="fa-solid fa-hourglass-half"></i> Pending</span>
+                                {% elif fb.status == 'resolved' %}
+                                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Resolved</span>
+                                {% else %}
+                                    <span class="badge" style="background: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3);"><i class="fa-solid fa-ban"></i> N/A</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr id="no-user-feedback-row" style="display: none;">
+                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 3rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; display: block;"></i>
+                            <p>No matching feedback found.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="user-feedback-pagination"></div>
+        </div>
+    {% else %}
+        <div class="glass" style="padding: 3rem; text-align: center;">
+            <p style="color: var(--text-secondary);">You haven't submitted any feedback yet.</p>
+            <a href="{% url 'feedback' %}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">Submit Feedback</a>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -273,9 +347,11 @@
     document.addEventListener("DOMContentLoaded", function() {
         const userBooksPag = createPaginator({ itemSelector: '.user-book-row', paginationContainerId: 'user-books-pagination', pageSize: 30 });
         const userArticlesPag = createPaginator({ itemSelector: '.user-article-row', paginationContainerId: 'user-articles-pagination', pageSize: 30 });
+        const userFeedbackPag = createPaginator({ itemSelector: '.user-feedback-row', paginationContainerId: 'user-feedback-pagination', pageSize: 30 });
 
         setupInstantTableFilter('search-user-book-input', 'filter-user-book-select', 'user-book-row', 'no-user-books-row', userBooksPag);
         setupInstantTableFilter('search-user-article-input', 'filter-user-article-select', 'user-article-row', 'no-user-articles-row', userArticlesPag);
+        setupInstantTableFilter('search-user-feedback-input', 'filter-user-feedback-select', 'user-feedback-row', 'no-user-feedback-row', userFeedbackPag);
     });
 </script>
 {% endblock %}
