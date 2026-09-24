@@ -126,115 +126,135 @@ def home_view(request):
         search_performed = True
         
         # Base filter: approved books & articles with visibility restrictions applied
-        approved_books = apply_visibility_filter(Book.objects.filter(is_approved=True), request.user)
-        approved_articles = apply_visibility_filter(Article.objects.filter(is_approved=True), request.user)
+        try:
+            approved_books = apply_visibility_filter(Book.objects.filter(is_approved=True), request.user)
+            approved_articles = apply_visibility_filter(Article.objects.filter(is_approved=True), request.user)
+        except Exception:
+            approved_books = Book.objects.filter(is_approved=True)
+            approved_articles = Article.objects.filter(is_approved=True)
 
         if not is_deep_search:
             # Standard Title, Description & Category search
-            matching_books = list(approved_books.filter(
-                Q(title__icontains=query) |
-                Q(description__icontains=query) |
-                Q(category_tag__icontains=query) |
-                Q(category__name__icontains=query)
-            ).distinct().order_by('-created_at'))
-            matching_articles = list(approved_articles.filter(
-                Q(title__icontains=query) |
-                Q(description__icontains=query) |
-                Q(category__name__icontains=query)
-            ).distinct().order_by('-created_at'))
+            try:
+                matching_books = list(approved_books.filter(
+                    Q(title__icontains=query) |
+                    Q(description__icontains=query) |
+                    Q(category_tag__icontains=query) |
+                    Q(category__name__icontains=query)
+                ).distinct().order_by('-created_at'))
+            except Exception:
+                matching_books = []
+
+            try:
+                matching_articles = list(approved_articles.filter(
+                    Q(title__icontains=query) |
+                    Q(description__icontains=query) |
+                    Q(category__name__icontains=query)
+                ).distinct().order_by('-created_at'))
+            except Exception:
+                matching_articles = []
         else:
             # Deep Search: search title, description, category, uploader AND inside PDF/attachment text contents
-            candidate_articles = list(approved_articles.order_by('-created_at'))
-            matched_a_list = []
-            query_lower = query.lower()
-            for a in candidate_articles:
-                try:
-                    cat_name = (a.get_category_name() or '').lower()
-                    title_text = (a.title or '').lower()
-                    desc_text = (a.description or '').lower()
-                    uploader_name = (a.uploaded_by.username if getattr(a, 'uploaded_by', None) else '').lower()
+            try:
+                candidate_articles = list(approved_articles.order_by('-created_at'))
+                matched_a_list = []
+                query_lower = query.lower()
+                for a in candidate_articles:
+                    try:
+                        cat_name = (a.get_category_name() or '').lower()
+                        title_text = (a.title or '').lower()
+                        desc_text = (a.description or '').lower()
+                        uploader_name = (a.uploaded_by.username if getattr(a, 'uploaded_by', None) else '').lower()
 
-                    if (query_lower in title_text or 
-                        query_lower in desc_text or 
-                        query_lower in cat_name or 
-                        query_lower in uploader_name):
-                        matched_a_list.append(a)
-                    else:
-                        # Check file attachments of the article (PDFs, Word Docs, TXT, etc.)
-                        att_match = False
-                        for att in a.attachments.all():
-                            try:
-                                att_fname = (getattr(att, 'file_name', '') or (att.file.name if att.file else '') or '').lower()
-                                if query_lower in att_fname or (att.file and file_contains_text(att.file, query)):
-                                    att_match = True
-                                    break
-                            except Exception:
-                                continue
-                        if att_match:
+                        if (query_lower in title_text or 
+                            query_lower in desc_text or 
+                            query_lower in cat_name or 
+                            query_lower in uploader_name):
                             matched_a_list.append(a)
-                except Exception:
-                    continue
-            matching_articles = matched_a_list
+                        else:
+                            # Check file attachments of the article (PDFs, Word Docs, TXT, etc.)
+                            att_match = False
+                            for att in a.attachments.all():
+                                try:
+                                    att_fname = (getattr(att, 'file_name', '') or (att.file.name if att.file else '') or '').lower()
+                                    if query_lower in att_fname or (att.file and file_contains_text(att.file, query)):
+                                        att_match = True
+                                        break
+                                except Exception:
+                                    continue
+                            if att_match:
+                                matched_a_list.append(a)
+                    except Exception:
+                        continue
+                matching_articles = matched_a_list
+            except Exception:
+                matching_articles = []
 
-            # For books: check title, description, category, uploader, AND pdf text content / pdf file name
-            candidate_books = list(approved_books.order_by('-created_at'))
-            matched_b_list = []
-            for b in candidate_books:
-                try:
-                    cat_name = (b.get_category_name() or '').lower()
-                    title_text = (b.title or '').lower()
-                    desc_text = (b.description or '').lower()
-                    cat_tag = (getattr(b, 'category_tag', '') or '').lower()
-                    uploader_name = (b.uploaded_by.username if getattr(b, 'uploaded_by', None) else '').lower()
+            try:
+                candidate_books = list(approved_books.order_by('-created_at'))
+                matched_b_list = []
+                query_lower = query.lower()
+                for b in candidate_books:
+                    try:
+                        cat_name = (b.get_category_name() or '').lower()
+                        title_text = (b.title or '').lower()
+                        desc_text = (b.description or '').lower()
+                        cat_tag = (getattr(b, 'category_tag', '') or '').lower()
+                        uploader_name = (b.uploaded_by.username if getattr(b, 'uploaded_by', None) else '').lower()
 
-                    if (query_lower in title_text or 
-                        query_lower in desc_text or 
-                        query_lower in cat_tag or 
-                        query_lower in cat_name or 
-                        query_lower in uploader_name):
-                        matched_b_list.append(b)
-                    elif b.pdf:
-                        try:
-                            pdf_fname = (b.pdf.name or '').lower()
-                            if query_lower in pdf_fname or file_contains_text(b.pdf, query):
-                                matched_b_list.append(b)
-                        except Exception:
-                            pass
-                except Exception:
-                    continue
-            matching_books = matched_b_list
+                        if (query_lower in title_text or 
+                            query_lower in desc_text or 
+                            query_lower in cat_tag or 
+                            query_lower in cat_name or 
+                            query_lower in uploader_name):
+                            matched_b_list.append(b)
+                        elif b.pdf:
+                            try:
+                                pdf_fname = (b.pdf.name or '').lower()
+                                if query_lower in pdf_fname or file_contains_text(b.pdf, query):
+                                    matched_b_list.append(b)
+                            except Exception:
+                                pass
+                    except Exception:
+                        continue
+                matching_books = matched_b_list
+            except Exception:
+                matching_books = []
 
     # Fetch highlighted books and articles for the home page carousel with visibility restrictions applied
-    highlighted_books = apply_visibility_filter(Book.objects.filter(is_approved=True, is_highlighted=True), request.user).order_by('-created_at')
-    highlighted_articles = apply_visibility_filter(Article.objects.filter(is_approved=True, is_highlighted=True), request.user).order_by('-created_at')
-    
-    # Merge highlighted list for carousel
     carousel_items = []
-    for b in highlighted_books:
-        cat_name = b.get_category_name()
-        carousel_items.append({
-            'type': 'book',
-            'type_label': 'Book',
-            'title': b.title,
-            'tag': cat_name,
-            'image': b.cover_image.url if b.cover_image else None,
-            'url_name': 'book_detail',
-            'pk': b.pk,
-            'desc': f"Category: {cat_name} | Uploaded by {b.uploaded_by.username}"
-        })
-    for a in highlighted_articles:
-        first_img = a.images.first()
-        cat_name = a.get_category_name()
-        carousel_items.append({
-            'type': 'article',
-            'type_label': 'Article',
-            'title': a.title,
-            'tag': cat_name,
-            'image': first_img.image.url if first_img else None,
-            'url_name': 'article_detail',
-            'pk': a.pk,
-            'desc': a.description[:150] + "..." if len(a.description) > 150 else a.description
-        })
+    try:
+        highlighted_books = apply_visibility_filter(Book.objects.filter(is_approved=True, is_highlighted=True), request.user).order_by('-created_at')
+        highlighted_articles = apply_visibility_filter(Article.objects.filter(is_approved=True, is_highlighted=True), request.user).order_by('-created_at')
+        
+        for b in highlighted_books:
+            cat_name = b.get_category_name()
+            uploader = b.uploaded_by.username if getattr(b, 'uploaded_by', None) else 'Unknown'
+            carousel_items.append({
+                'type': 'book',
+                'type_label': 'Book',
+                'title': b.title,
+                'tag': cat_name,
+                'image': b.cover_image.url if b.cover_image else None,
+                'url_name': 'book_detail',
+                'pk': b.pk,
+                'desc': f"Category: {cat_name} | Uploaded by {uploader}"
+            })
+        for a in highlighted_articles:
+            first_img = a.images.first()
+            cat_name = a.get_category_name()
+            carousel_items.append({
+                'type': 'article',
+                'type_label': 'Article',
+                'title': a.title,
+                'tag': cat_name,
+                'image': first_img.image.url if first_img else None,
+                'url_name': 'article_detail',
+                'pk': a.pk,
+                'desc': (a.description[:150] + "...") if a.description and len(a.description) > 150 else (a.description or "")
+            })
+    except Exception:
+        pass
         
     context = {
         'carousel_items': carousel_items,
