@@ -31,12 +31,62 @@
     
     <!-- Image Gallery -->
     {% if article.images.exists %}
+        <style>
+            .gallery-nav-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.55);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                backdrop-filter: blur(8px);
+                transition: all 0.2s ease;
+                z-index: 10;
+            }
+            .gallery-nav-btn:hover {
+                background: var(--accent-indigo, #6366f1) !important;
+                border-color: rgba(255, 255, 255, 0.5) !important;
+                transform: translateY(-50%) scale(1.1) !important;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            }
+            .detail-image {
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            .detail-image:hover {
+                transform: scale(1.03);
+                opacity: 1 !important;
+            }
+        </style>
         <div style="margin-bottom: 2.5rem;">
             <h3 style="font-size: 1.25rem; margin-bottom: 1rem;"><i class="fa-solid fa-camera-retro" style="color: var(--accent-indigo);"></i> Photo Gallery</h3>
             
             <!-- Featured Display Area -->
-            <div id="gallery-featured" style="width: 100%; height: 450px; border-radius: 12px; border: 1px solid var(--border-glass); overflow: hidden; margin-bottom: 1.5rem;">
+            <div id="gallery-featured" style="width: 100%; height: 450px; border-radius: 12px; border: 1px solid var(--border-glass); overflow: hidden; margin-bottom: 1.5rem; position: relative;">
                 <img id="featured-img" src="{{ article.images.first.image.url }}" alt="{{ article.title }}" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition);">
+                
+                {% if article.images.count > 1 %}
+                    <!-- Next & Previous Overlay Arrows -->
+                    <button type="button" class="gallery-nav-btn" onclick="navigateGallery(-1)" style="left: 1rem;" title="Previous Photo">
+                        <i class="fa-solid fa-chevron-left" style="font-size: 1.2rem;"></i>
+                    </button>
+
+                    <button type="button" class="gallery-nav-btn" onclick="navigateGallery(1)" style="right: 1rem;" title="Next Photo">
+                        <i class="fa-solid fa-chevron-right" style="font-size: 1.2rem;"></i>
+                    </button>
+
+                    <!-- Photo Counter -->
+                    <div style="position: absolute; bottom: 1rem; right: 1rem; background: rgba(0, 0, 0, 0.65); color: white; border: 1px solid rgba(255, 255, 255, 0.2); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; backdrop-filter: blur(8px); z-index: 10;">
+                        <span id="gallery-current-idx">1</span> / {{ article.images.count }}
+                    </div>
+                {% endif %}
             </div>
             
             <!-- Thumbnail Row -->
@@ -111,13 +161,67 @@
 
 {% block extra_js %}
 <script>
-    function setFeatured(url) {
+    const galleryImages = [
+        {% for img in article.images.all %}
+            "{{ img.image.url }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    let currentGalleryIdx = 0;
+
+    function updateGallery(index) {
+        if (!galleryImages.length) return;
+        if (index >= galleryImages.length) index = 0;
+        if (index < 0) index = galleryImages.length - 1;
+
+        currentGalleryIdx = index;
         const featured = document.getElementById('featured-img');
-        featured.style.opacity = 0;
-        setTimeout(() => {
-            featured.src = url;
-            featured.style.opacity = 1;
-        }, 150);
+        const counter = document.getElementById('gallery-current-idx');
+        
+        if (featured) {
+            featured.style.opacity = 0;
+            setTimeout(() => {
+                featured.src = galleryImages[currentGalleryIdx];
+                featured.style.opacity = 1;
+            }, 150);
+        }
+
+        if (counter) {
+            counter.textContent = currentGalleryIdx + 1;
+        }
+
+        // Active thumbnail outline
+        const thumbnails = document.querySelectorAll('.detail-image');
+        thumbnails.forEach((thumb, i) => {
+            if (i === currentGalleryIdx) {
+                thumb.style.borderColor = 'var(--accent-indigo)';
+                thumb.style.boxShadow = '0 0 0 2px var(--accent-indigo)';
+                thumb.style.opacity = '1';
+            } else {
+                thumb.style.borderColor = 'var(--border-glass)';
+                thumb.style.boxShadow = 'none';
+                thumb.style.opacity = '0.7';
+            }
+        });
     }
+
+    function setFeatured(url) {
+        const idx = galleryImages.indexOf(url);
+        if (idx !== -1) {
+            updateGallery(idx);
+        } else {
+            const featured = document.getElementById('featured-img');
+            if (featured) featured.src = url;
+        }
+    }
+
+    function navigateGallery(direction) {
+        updateGallery(currentGalleryIdx + direction);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (galleryImages.length) {
+            updateGallery(0);
+        }
+    });
 </script>
 {% endblock %}
