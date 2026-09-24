@@ -224,7 +224,7 @@
                         <tr class="user-feedback-row">
                             <td data-col="subject">
                                 <strong style="color: var(--text-primary); display: block; margin-bottom: 0.25rem;">{{ fb.subject }}</strong>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message }}</span>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message|default:"(No message details)" }}</span>
                             </td>
                             <td>
                                 {% if fb.images.exists %}

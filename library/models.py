@@ -138,7 +138,7 @@ class Feedback(models.Model):
     )
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='feedbacks')
     subject = models.CharField(max_length=200)
-    message = models.TextField()
+    message = models.TextField(blank=True, default='')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

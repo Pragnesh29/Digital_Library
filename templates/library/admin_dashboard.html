@@ -969,7 +969,7 @@
                             </td>
                             <td data-col="content" style="max-width: 320px;">
                                 <strong style="color: var(--text-primary); display: block; margin-bottom: 0.35rem;">{{ fb.subject }}</strong>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message }}</span>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); white-space: pre-line;">{{ fb.message|default:"(No message details)" }}</span>
                             </td>
                             <td>
                                 {% if fb.images.all %}

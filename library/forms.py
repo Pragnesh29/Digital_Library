@@ -131,8 +131,9 @@ class FeedbackForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['subject'].widget.attrs['class'] = 'form-control'
         self.fields['subject'].widget.attrs['placeholder'] = 'Enter Feedback Subject'
+        self.fields['message'].required = False
         self.fields['message'].widget.attrs['class'] = 'form-control'
-        self.fields['message'].widget.attrs['placeholder'] = 'Describe your feedback or issue in detail...'
+        self.fields['message'].widget.attrs['placeholder'] = 'Describe your feedback or issue in detail (optional)...'
         self.fields['message'].widget.attrs['rows'] = 5
         if 'images' in self.fields:
             self.fields['images'].widget.attrs['accept'] = 'image/*'
